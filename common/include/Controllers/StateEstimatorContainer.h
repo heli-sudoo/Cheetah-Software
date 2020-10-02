@@ -15,6 +15,8 @@
 #include "SimUtilities/IMUTypes.h"
 #include "SimUtilities/VisualizationData.h"
 #include "state_estimator_lcmt.hpp"
+#include "Dynamics/FloatingBaseModel.h"
+
 
 /*!
  * Result of state estimation
@@ -72,13 +74,16 @@ struct StateEstimatorData {
 template <typename T>
 class GenericEstimator {
  public:
+  GenericEstimator(){}
   virtual void run() = 0;
   virtual void setup() = 0;
 
   void setData(StateEstimatorData<T> data) { _stateEstimatorData = data; }
+  void setModel(FloatingBaseModel<T> *model) {_model = model; }
 
   virtual ~GenericEstimator() = default;
   StateEstimatorData<T> _stateEstimatorData;
+  FloatingBaseModel<T> *_model;
 };
 
 /*!
@@ -136,6 +141,13 @@ class StateEstimatorContainer {
   }
 
   /*!
+   * Set floating base model
+   */
+  void setModel(FloatingBaseModel<T> *model){
+    _model = model;
+  }
+
+  /*!
    * Add an estimator of the given type
    * @tparam EstimatorToAdd
    */
@@ -143,6 +155,7 @@ class StateEstimatorContainer {
   void addEstimator() {
     auto* estimator = new EstimatorToAdd();
     estimator->setData(_data);
+    estimator->setModel(_model);
     estimator->setup();
     _estimators.push_back(estimator);
   }
@@ -188,6 +201,8 @@ class StateEstimatorContainer {
   StateEstimatorData<T> _data;
   std::vector<GenericEstimator<T>*> _estimators;
   Vec4<T> _phase;
+  FloatingBaseModel<T> *_model;
+
 };
 
 #endif  // PROJECT_STATEESTIMATOR_H
