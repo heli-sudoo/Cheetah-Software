@@ -85,6 +85,7 @@ void RobotRunner::run() {
   // Run the state estimator step
   //_stateEstimator->run(cheetahMainVisualization);
   _stateEstimator->run();
+
   //cheetahMainVisualization->p = _stateEstimate.position;
   visualizationData->clear();
 
@@ -101,6 +102,7 @@ void RobotRunner::run() {
     _legController->setEnabled(false);
   } else {
     _legController->setEnabled(true);
+
 
     if( (rc_control.mode == 0) && controlParameters->use_rc ) {
       if(count_ini%1000 ==0)   printf("ESTOP!\n");
@@ -222,7 +224,8 @@ void RobotRunner::finalizeStep() {
  * @param cheaterMode
  */
 void RobotRunner::initializeStateEstimator(bool cheaterMode) {
-  _stateEstimator->removeAllEstimators();
+  _stateEstimator->removeAllEstimators();  
+  _stateEstimator->setModel(&_model);
   _stateEstimator->addEstimator<ContactEstimator<float>>();
   Vec4<float> contactDefault;
   contactDefault << 0.5, 0.5, 0.5, 0.5;
