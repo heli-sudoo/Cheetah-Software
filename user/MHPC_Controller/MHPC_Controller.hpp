@@ -11,6 +11,8 @@ class MHPC_Controller:public RobotController{
     MHPC_Controller():RobotController(),_mhpc_ini(cheetah::num_act_joint){
     _mhpc_ini.setZero();
     _K_DDP_data = new Mat4_14<float> [4500];
+    _init_foot_pos = std::vector<Vec3<float>> (4);
+    _F_ff = std::vector<Vec3<float>> (4);
     }
     virtual ~MHPC_Controller(){delete [] _K_DDP_data;}
 
@@ -33,7 +35,14 @@ class MHPC_Controller:public RobotController{
     void write_fb_mat_data();
     void write_4f_data(const char*, std::vector<Vec4<float>>&);
     void write_mat_data(const char*, Mat4_14<float>*);
+    void standUp_control_run();
+    void standUp_control_enter();
+    void standUp_control();
 
+    void jointPD_control();
+    void bounding_control_enter();
+    void bounding_control_run();
+    void bounding_control();
 
     virtual ControlParameters* getUserControlParameters() {
       return &userParameters;
@@ -46,6 +55,7 @@ class MHPC_Controller:public RobotController{
     std::vector<Vec4<float>> _qddes_data;
     std::vector<Vec3<float>> _pos_des_data;
     std::vector<Vec3<float>> _vel_des_data;
+    std::vector<Vec3<float>> _F_ff;
     // std::vector<Mat4_14<float>> _K_DDP_data;
     Mat4_14<float>* _K_DDP_data;
 
@@ -64,9 +74,12 @@ class MHPC_Controller:public RobotController{
     Vec4<float> _qd_act;
     Vec4<float> _q_des;
     Vec4<float> _qd_des;
+    std::vector<Vec3<float>> _init_foot_pos;
+    int iter_stand = 0;
 
-    size_t bounding_step;
+    size_t _bounding_step;
     bool bounding;
+    bool _stand_up;
   protected:
     DVec<float> _mhpc_ini;
     FBModelState<float> homeState;
