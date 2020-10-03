@@ -46,22 +46,41 @@ void DynamicsSimulator<T>::step(T dt, const DVec<T> &tau, T kp, T kd ) {
   forwardKinematics();           // compute forward kinematics
   updateCollisions(dt, kp, kd);  // process collisions
   // Process Homing
-  if( _homing.active_flag) {
-
-    Mat3<T> R10_des = rpyToRotMat(_homing.rpy);              // R10_des
-    Mat3<T> R10_act = _model.getOrientation(5).transpose();  // R10
-    Mat3<T> eR01 = R10_des.transpose()*R10_act;              // eR * R01 = R01_des
+  static int delay_flag = 0;     // avoid NAN when clicking go_home button
+  if( _homing.active_flag || _homing.active_flag_2D) {
+    if (_state.reset)
+    {
+      delay_flag += 1;
+    }
     
-    Vec4<T> equat = rotationMatrixToQuaternion(eR01.transpose());
-    Vec3<T> angle_axis = quatToso3(equat); // in world frame
+    if ((delay_flag >= 10) || _state.reset==false)
+        {
+          Mat3<T> R10_des = rpyToRotMat(_homing.rpy);              // R10_des
+          Mat3<T> R10_act = _model.getOrientation(5).transpose();  // R10
+          Mat3<T> eR01 = R10_des.transpose()*R10_act;              // eR * R01 = R01_des
+          
+          Vec4<T> equat = rotationMatrixToQuaternion(eR01.transpose());
+          Vec3<T> angle_axis = quatToso3(equat); // in world frame
 
-    Vec3<T> p = _model.getPosition(5);
-    Vec3<T> f = _homing.kp_lin*(_homing.position - p)-_homing.kd_lin*_model.getLinearVelocity(5);
+          Vec3<T> p = _model.getPosition(5);
+          Vec3<T> f = _homing.kp_lin*(_homing.position - p)-_homing.kd_lin*_model.getLinearVelocity(5);
 
-    // Note: External forces are spatial forces in the {0} frame. 
-    _model._externalForces.at(5) += forceToSpatialForce(f,p);
-    _model._externalForces.at(5).head(3) += _homing.kp_ang*angle_axis - _homing.kd_ang*_model.getAngularVelocity(5);
+          // Note: External forces are spatial forces in the {0} frame. 
+          _model._externalForces.at(5) += forceToSpatialForce(f,p);
 
+          _model._externalForces.at(5).head(3) += _homing.kp_ang*angle_axis - _homing.kd_ang*_model.getAngularVelocity(5);
+        
+
+          if (_homing.active_flag_2D)
+          {
+            _model._externalForces.at(5)[1] = 0; // moment about y
+            _model._externalForces.at(5)[3] = 0; // force along x
+            _model._externalForces.at(5)[5] = 0; // force along z
+          }
+          delay_flag = 0;
+          _state.reset = false;
+        }    
+    
   }
 
 
@@ -99,8 +118,9 @@ void DynamicsSimulator<T>::integrate(T dt) {
     Vec3<T> omega0 = R.transpose() * omegaBody;
 
     // actual integration
+    _state.q += _state.qd * dt; 
     _state.qd += _dstate.qdd * dt;
-    _state.q += _state.qd * dt;
+    
 
     _state.bodyVelocity += _dstate.dBodyVelocity * dt;
     _state.bodyPosition += _dstate.dBodyPosition * dt;
