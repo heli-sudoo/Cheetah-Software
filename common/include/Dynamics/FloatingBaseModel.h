@@ -42,6 +42,7 @@ struct FBModelState {
   SVec<T> bodyVelocity;  // body coordinates
   DVec<T> q;
   DVec<T> qd;
+  bool    reset;
 
   /*!
    * Print the position of the body
