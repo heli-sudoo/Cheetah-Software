@@ -37,6 +37,7 @@ class SimulatorControlParameters : public ControlParameters {
         INIT_PARAMETER(sim_state_lcm),
         INIT_PARAMETER(sim_lcm_ttl),
         INIT_PARAMETER(go_home),
+        INIT_PARAMETER(sim_2D),
         INIT_PARAMETER(home_pos),
         INIT_PARAMETER(home_rpy),
         INIT_PARAMETER(home_kp_lin),
@@ -63,6 +64,7 @@ class SimulatorControlParameters : public ControlParameters {
   DECLARE_PARAMETER(s64, sim_lcm_ttl)
 
   DECLARE_PARAMETER(s64, go_home)
+  DECLARE_PARAMETER(s64, sim_2D)
   DECLARE_PARAMETER(Vec3<double>,home_pos)
   DECLARE_PARAMETER(Vec3<double>,home_rpy)
   DECLARE_PARAMETER(double, home_kp_lin)

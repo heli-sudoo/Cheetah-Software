@@ -16,6 +16,7 @@
 #define DEFAULT_TERRAIN_FILE "/default-terrain.yaml"
 #define DEFAULT_USER_FILE "/default-user-parameters-file.yaml"
 
+
 #include <lcm-cpp.hpp>
 #include <src/MiniCheetahDebug.h>
 #include <leg_control_data_lcmt.hpp>

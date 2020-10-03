@@ -364,6 +364,7 @@ void Simulation::step(double dt, double dtLowLevelControl,
   // Set Homing Information
   RobotHomingInfo<double> homing;
   homing.active_flag = _simParams.go_home;
+  homing.active_flag_2D = _simParams.sim_2D;
   homing.position = _simParams.home_pos;
   homing.rpy = _simParams.home_rpy;
   homing.kp_lin = _simParams.home_kp_lin;
@@ -373,6 +374,7 @@ void Simulation::step(double dt, double dtLowLevelControl,
   _simulator->setHoming(homing);
 
   _simulator->step(dt, _tau, _simParams.floor_kp, _simParams.floor_kd);
+  
 }
 
 void Simulation::lowLevelControl() {
