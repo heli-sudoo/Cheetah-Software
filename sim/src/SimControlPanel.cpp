@@ -847,14 +847,36 @@ void SimControlPanel::on_saveUserButton_clicked() {
 void SimControlPanel::on_goHomeButton_clicked() {
   printf("go home\n");
   FBModelState<double> homeState;
-  homeState.bodyOrientation << 1, 0, 0, 0;
-  homeState.bodyPosition = Vec3<double>(0, 0, 0.4);
+  // homeState.bodyOrientation << 1, 0, 0, 0;
+  // homeState.bodyPosition = Vec3<double>(0, 0, 0.4);
+  // homeState.bodyVelocity = SVec<double>::Zero();
+  // homeState.q = DVec<double>(12);
+  // homeState.q << -0.05, -0.8, 1.7, 0.05, -0.8, 1.7, -0.05, -0.8, 1.7, 0.05, -0.8, 1.7;
+  // homeState.qd = homeState.q;
+
+  // homeState.bodyPosition = Vec3<double>(0, 0, 0.2771);
+  // homeState.bodyOrientation = rpyToQuat(Vec3<double>(0, -0.1208, 0));
+  // homeState.bodyVelocity = SVec<double>::Zero();
+  // homeState.bodyVelocity.tail(3) << 1, 0, -0.1;
+  // homeState.q = DVec<double>(12);
+  // homeState.q << 0, -1.4137,2.042, 0, -1.4137, 2.042, 0, -0.6912,1.7279, 0, -0.6912,1.7279;
+  // homeState.qd  = DVec<double>(12);
+  // homeState.qd.setZero();
+  // homeState.qd.tail(6) << 0, -4.6311, 2.2649, 0, -4.6311, 2.2649;
+  // homeState.reset = true;
+
+  homeState.bodyPosition = Vec3<double>(0, 0, 0.2565);
+  homeState.bodyOrientation = rpyToQuat(Vec3<double>(0, -0.12, 0));
   homeState.bodyVelocity = SVec<double>::Zero();
   homeState.q = DVec<double>(12);
-  homeState.q << -0.05, -0.8, 1.7, 0.05, -0.8, 1.7, -0.05, -0.8, 1.7, 0.05, -0.8, 1.7;
-  homeState.qd = homeState.q;
+  homeState.q << 0, -0.65,1.569, 0, -0.65,1.569, 0, -0.6, 1.8, 0, -0.6, 1.8;
+  homeState.qd  = DVec<double>(12);
+  homeState.qd.setZero();
+  homeState.reset = true;
 
   _simulation->setRobotState(homeState);
+
+
 }
 
 void SimControlPanel::on_kickButton_clicked() {
