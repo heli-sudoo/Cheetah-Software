@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 
 void MHPC_Controller::runController(){
@@ -9,30 +10,39 @@ void MHPC_Controller::runController(){
   _legController->_maxTorque = 150;
   _legController->_legsEnabled = true;
 
-
   static int iter(0);
   ++iter;
 
-  if (_controlParameters->control_mode == 1){
-    standUp_control();
-    bounding = false;}
-
-  if (_controlParameters->control_mode == 3){
-    bounding_control();
-    _stand_up = false;
+  for (int leg(0); leg < 4; ++leg)
+  {
+    _foot_vel_current[leg] = _legController->datas[leg].v;
+    _foot_vel_prev[leg] = _foot_vel_current[leg];
   }
 
-  if (_controlParameters->control_mode == 4){
+  if (_controlParameters->control_mode == STANDUP){
+    bounding = false;
+    // _contactState << 0.5,0.5,0.5,0.5;
+    standUp_control();    
+    // _stateEstimator->setContactPhase(_contactState);
+  }
+
+  if (_controlParameters->control_mode == BOUNDING){
+    _stand_up = false;
+    // _contactState = getContactState();
+    bounding_control();
+  }
+
+  if (_controlParameters->control_mode == JOINTPD){
     jointPD_control();
     _stand_up = false;
     bounding = false;
   }
 
-  if (_controlParameters->control_mode == 0)
+  if (_controlParameters->control_mode == PASSIVE)
   {
     _stand_up = false;
     bounding = false;
-  }
+  }  
 
   // std::cout<< "Contact " << _stateEstimate->contactEstimate << std::endl;
 }
@@ -59,9 +69,54 @@ void MHPC_Controller::initializeController()
   bounding = false;
   _bounding_step = 0;
   _stand_up = false;
+  _first_takeoff.setOnes();
+  _contactState << 0.5,0.5,0.5,0.5;
 }
 
+Vec4<float> MHPC_Controller::getContactState()
+{
+  Vec4<float> progress(0.5, 0.5, 0.5, 0.5);
+  if (!_first_takeoff.isZero())
+  {
+    for (int leg(0); leg < 4; ++leg)
+    {
+      if (_first_takeoff[leg]) // if hasn't made the first takeoff
+      {
+        if (_legController->datas[leg].v[2] > 0.1) // takeoff
+        {
+          progress[leg] = 0;
+          _first_takeoff[leg] = 0;
+          _stanceFlag[leg] = 0;
+        }
+      }
+    }
+  }else {
+    for (int leg(0); leg < 4; ++leg)
+    {
+      if (!_stanceFlag[leg]) {// if in flight phase, check touchdown
+        _stanceTime[leg] = 0;
+        if (touchDown_check(leg)){
+          _stanceFlag[leg] = 1;          
+        }
+      }else{
+        ++_stanceTime[leg];
+        if (_stanceTime[leg]>_duration[leg])
+        {
+          _stanceFlag[leg] = 0;
+          _stanceTime[leg] = 0;
+        }
+      }
+      progress[leg] = _stanceTime[leg]/_duration[leg];
+    }
+  }
+  return progress;
+}
+  
+      
 
+bool MHPC_Controller::touchDown_check(int leg){
+  return abs(_foot_vel_current[leg][2] - _foot_vel_prev[leg][2]) > 0.01 ;
+}
 
 bool MHPC_Controller::goHome_check()
 {
@@ -144,7 +199,7 @@ void MHPC_Controller::bounding_control_run(){
     }
     _tau_ff = _tau_ff/2;   
 
-    // regulate roll motion
+    /* regulate roll motion*/
     float tau_roll_fb, kp_roll = 30, kd_roll=5, dist;
     _F_ff[0].setZero();
     _F_ff[1].setZero();
@@ -154,12 +209,12 @@ void MHPC_Controller::bounding_control_run(){
     tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaBody[0];
     dist = -_legController->datas[0].p[2];
 
-    if (_stateEstimate->contactEstimate[0] and _stateEstimate->contactEstimate[1])
+    if (_contactState[0]>0.2 and _contactState[1]>0.2)
     {
       _F_ff[0][0] = -0.5*tau_roll_fb/dist;
       _F_ff[1][0] = 0.5*tau_roll_fb/dist;
     }
-    else if (_stateEstimate->contactEstimate[2] and _stateEstimate->contactEstimate[3])
+    else if (_contactState[2]>0.2 and _contactState[3]>0.2)
     {
       _F_ff[2][0] = -0.5*tau_roll_fb/dist;
       _F_ff[3][0] = 0.5*tau_roll_fb/dist;

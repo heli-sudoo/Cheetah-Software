@@ -5,6 +5,10 @@
 #include "MHPCUserParameters.h"
 #include "MHPC_cpptypes.h"
 
+#define STANDUP 1
+#define BOUNDING 3
+#define JOINTPD 4
+#define PASSIVE 0
 
 class MHPC_Controller:public RobotController{
   public:
@@ -12,7 +16,10 @@ class MHPC_Controller:public RobotController{
     _mhpc_ini.setZero();
     _K_DDP_data = new Mat4_14<float> [4500];
     _init_foot_pos = std::vector<Vec3<float>> (4);
-    _F_ff = std::vector<Vec3<float>> (4);
+    _F_ff = std::vector<Vec3<float>> (4);  
+    _foot_vel_prev = std::vector<Vec3<float>> (4);  
+    _foot_vel_current = std::vector<Vec3<float>> (4);  
+
     }
     virtual ~MHPC_Controller(){delete [] _K_DDP_data;}
 
@@ -43,12 +50,13 @@ class MHPC_Controller:public RobotController{
     void bounding_control_enter();
     void bounding_control_run();
     void bounding_control();
+    bool touchDown_check(int);
+    Vec4<float> getContactState();
 
     virtual ControlParameters* getUserControlParameters() {
       return &userParameters;
     }
     
-    int _sim_len;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // overload new operator to avoid alignment issue
     std::vector<Vec4<float>> _tau_ff_data;
     std::vector<Vec4<float>> _qdes_data;
@@ -56,7 +64,10 @@ class MHPC_Controller:public RobotController{
     std::vector<Vec3<float>> _pos_des_data;
     std::vector<Vec3<float>> _vel_des_data;
     std::vector<Vec3<float>> _F_ff;
-    // std::vector<Mat4_14<float>> _K_DDP_data;
+    std::vector<Vec3<float>> _foot_vel_prev;
+    std::vector<Vec3<float>> _foot_vel_current;
+    std::vector<Vec3<float>> _init_foot_pos;
+    
     Mat4_14<float>* _K_DDP_data;
 
     Vec4<float> _tau_ff;  
@@ -67,19 +78,26 @@ class MHPC_Controller:public RobotController{
     Vec3<float> _pos_act;
     Vec3<float> _vel_act;
     Vec3<float> _vel_des;
-
     Mat4<float> _Kp_hip_knee;
     Mat4<float> _Kd_hip_knee;
     Vec4<float> _q_act;
     Vec4<float> _qd_act;
     Vec4<float> _q_des;
     Vec4<float> _qd_des;
-    std::vector<Vec3<float>> _init_foot_pos;
-    int iter_stand = 0;
+    Vec4<float> _progress;
+    Vec4<bool> _first_takeoff;
+    Vec4<float> _contactState;
 
+
+    int iter_stand = 0;
+    int _sim_len;
+    int _stanceTime[4];
+    int _duration[4] = {72,72,80,80};
     size_t _bounding_step;
     bool bounding;
     bool _stand_up;
+    bool _stanceFlag[4];    
+
   protected:
     DVec<float> _mhpc_ini;
     FBModelState<float> homeState;
