@@ -33,6 +33,7 @@ struct RobotHomingInfo {
   double kp_ang;
   double kd_ang;
   bool active_flag;
+  bool active_flag_2D;
 };
 
 /*!
