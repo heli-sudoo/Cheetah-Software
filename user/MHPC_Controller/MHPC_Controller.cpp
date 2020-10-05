@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <cmath>
 
 
 void MHPC_Controller::runController(){
@@ -14,37 +15,46 @@ void MHPC_Controller::runController(){
   ++iter;
 
   for (int leg(0); leg < 4; ++leg)
-  {
-    _foot_vel_current[leg] = _legController->datas[leg].v;
-    _foot_vel_prev[leg] = _foot_vel_current[leg];
-  }
+   {
+     _foot_vel_prev[leg] = _foot_vel_current[leg];
+     _foot_vel_current[leg] = _legController->datas[leg].v; 
+   } 
+  
 
   if (_controlParameters->control_mode == STANDUP){
-    bounding = false;
-    // _contactState << 0.5,0.5,0.5,0.5;
-    standUp_control();    
-    // _stateEstimator->setContactPhase(_contactState);
+    _bounding = false;
+    _preBounding = false;    
+    standUp_control();        
   }
 
   if (_controlParameters->control_mode == BOUNDING){
     _stand_up = false;
-    // _contactState = getContactState();
+    _preBounding = false;    
     bounding_control();
+    // std::cout << "contact state" << _contactState << std::endl;
   }
 
-  if (_controlParameters->control_mode == JOINTPD){
+  if (_controlParameters->control_mode == PREBOUNDING){
+    _stand_up = false;
+    _bounding = false;    
+    preBounding_control();      
+    _first_takeoff.setOnes();      
+  }
+
+  if (_controlParameters->control_mode == JOINTPD){    
     jointPD_control();
     _stand_up = false;
-    bounding = false;
+    _bounding = false;
+    _preBounding = false;
   }
 
   if (_controlParameters->control_mode == PASSIVE)
   {
     _stand_up = false;
-    bounding = false;
+    _bounding = false;
+    _preBounding = false;
   }  
 
-  // std::cout<< "Contact " << _stateEstimate->contactEstimate << std::endl;
 }
 
 
@@ -66,11 +76,13 @@ void MHPC_Controller::initializeController()
   read_pos_des_data();
   read_vel_des_data();
 
-  bounding = false;
+  _bounding = false;
   _bounding_step = 0;
   _stand_up = false;
   _first_takeoff.setOnes();
   _contactState << 0.5,0.5,0.5,0.5;
+  _loc_foot << 0,0,-_quadruped->_kneeLinkLength;
+
 }
 
 Vec4<float> MHPC_Controller::getContactState()
@@ -80,24 +92,29 @@ Vec4<float> MHPC_Controller::getContactState()
   {
     for (int leg(0); leg < 4; ++leg)
     {
-      if (_first_takeoff[leg]) // if hasn't made the first takeoff
-      {
-        if (_legController->datas[leg].v[2] > 0.1) // takeoff
+      if (_first_takeoff[leg]){ // if hasn't made the first takeoff      
+        
+        if (takeoff_check(leg)) // takeoff
         {
           progress[leg] = 0;
           _first_takeoff[leg] = 0;
           _stanceFlag[leg] = 0;
+          // std::cout << "leg " << leg << "takeoff" << std::endl; 
         }
+      }
+      else{
+        progress[leg] = 0;
       }
     }
   }else {
     for (int leg(0); leg < 4; ++leg)
     {
       if (!_stanceFlag[leg]) {// if in flight phase, check touchdown
-        _stanceTime[leg] = 0;
+        // _stanceTime[leg] = 0;
         if (touchDown_check(leg)){
-          _stanceFlag[leg] = 1;          
+          _stanceFlag[leg] = 1; 
         }
+        progress[leg] = 0;
       }else{
         ++_stanceTime[leg];
         if (_stanceTime[leg]>_duration[leg])
@@ -105,8 +122,14 @@ Vec4<float> MHPC_Controller::getContactState()
           _stanceFlag[leg] = 0;
           _stanceTime[leg] = 0;
         }
+        progress[leg] = 0.5;
+        // if (takeoff_check(leg))
+        // {
+        //   progress[leg] = 0;
+        //   _stanceFlag[leg] = 0;
+        // }
       }
-      progress[leg] = _stanceTime[leg]/_duration[leg];
+      // progress[leg] = _stanceTime[leg]/_duration[leg]; // works but  estimation goes below ground
     }
   }
   return progress;
@@ -115,7 +138,20 @@ Vec4<float> MHPC_Controller::getContactState()
       
 
 bool MHPC_Controller::touchDown_check(int leg){
-  return abs(_foot_vel_current[leg][2] - _foot_vel_prev[leg][2]) > 0.01 ;
+  return (_foot_vel_current[leg]-_foot_vel_prev[leg]).norm() > 0.6;
+}
+
+bool MHPC_Controller::takeoff_check(int leg){
+  _state.bodyPosition = _stateEstimate->position;
+  _state.bodyOrientation = _stateEstimate->orientation;
+  _state.bodyVelocity.head(3) = _stateEstimate->omegaBody;
+  _state.bodyVelocity.tail(3) = _stateEstimate->vBody;
+  _legDatas = _legController->datas;
+  _state.q << _legDatas[0].q,_legDatas[1].q,_legDatas[2].q,_legDatas[3].q; 
+  _state.qd << _legDatas[0].qd,_legDatas[1].qd,_legDatas[2].qd,_legDatas[3].qd; 
+  _model->setState(_state);  
+
+  return _model->getLinearVelocity(_foot_ID[leg], _loc_foot)[2]>0.5;
 }
 
 bool MHPC_Controller::goHome_check()
@@ -141,10 +177,12 @@ bool MHPC_Controller::goHome_check()
   } 
 }
 void MHPC_Controller::bounding_control(){
-  if (!bounding){
-    bounding = true;
+  _contactState = getContactState();
+  _stateEstimator->setContactPhase(_contactState);
+  if (!_bounding){
+    _bounding = true;
     bounding_control_enter();
-  }else {bounding_control_run();}
+  }else {bounding_control_run(); }
 }
 
 void MHPC_Controller::bounding_control_enter(){
@@ -164,98 +202,92 @@ void MHPC_Controller::bounding_control_run(){
   kdMat <<  5*userParameters.kd, 0, 0, 0, userParameters.kd, 0, 0, 0, userParameters.kd;
 
   // set feedforward control
-    _tau_ff = -_tau_ff_data[_bounding_step]; // sign opposite as in MATLB, magnitude takes half
+  _tau_ff = -_tau_ff_data[_bounding_step]; // sign opposite as in MATLB, magnitude takes half
 
-    if (_controlParameters->control_mode == 3)
-    {
-      // feedback control associated with x, z and pitch
-      _K = _K_DDP_data[_bounding_step];
-      _Kp_cart = _K.block<4,3>(0,0);
-      _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
-      _Kd_cart = _K.block<4,3>(0,7); 
-      _pos_act << _stateEstimate->position[0], _stateEstimate->position[2], _stateEstimate->rpy[1];
-      _pos_des = _pos_des_data[_bounding_step];
-      _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaBody[1];
-      _vel_des = _vel_des_data[_bounding_step];
-      _tau_ff += -0.5*(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
+  // feedback control associated with x, z and pitch
+  _K = _K_DDP_data[_bounding_step];
+  _Kp_cart = _K.block<4,3>(0,0);
+  _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
+  _Kd_cart = _K.block<4,3>(0,7); 
+  _pos_act << _stateEstimate->position[0], _stateEstimate->position[2], _stateEstimate->rpy[1];
+  _pos_des = _pos_des_data[_bounding_step];
+  _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaBody[1];
+  _vel_des = _vel_des_data[_bounding_step];
+  _tau_ff += -0.2*(0*_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
 
-      // feedback control associated with q1, q2, q3, q4
-      _Kp_hip_knee = _K.block<4,4>(0,3);
-      _Kd_hip_knee = _K.block<4,4>(0,10);
-      float q1 = (_legController->datas[0].q[1] + _legController->datas[1].q[1])/2;   // Front hip
-      float q2 = (_legController->datas[0].q[2] + _legController->datas[1].q[2])/2;   // Front knee
-      float q3 = (_legController->datas[2].q[1] + _legController->datas[3].q[1])/2;   // Back hip
-      float q4 = (_legController->datas[2].q[2] + _legController->datas[3].q[2])/2;   // Back knee
+  // feedback control associated with q1, q2, q3, q4
+  _Kp_hip_knee = _K.block<4,4>(0,3);
+  _Kd_hip_knee = _K.block<4,4>(0,10);
+  float q1 = (_legController->datas[0].q[1] + _legController->datas[1].q[1])/2;   // Front hip
+  float q2 = (_legController->datas[0].q[2] + _legController->datas[1].q[2])/2;   // Front knee
+  float q3 = (_legController->datas[2].q[1] + _legController->datas[3].q[1])/2;   // Back hip
+  float q4 = (_legController->datas[2].q[2] + _legController->datas[3].q[2])/2;   // Back knee
 
-      float qd1 = (_legController->datas[0].qd[1] + _legController->datas[1].qd[1])/2;   // Front hip
-      float qd2 = (_legController->datas[0].qd[2] + _legController->datas[1].qd[2])/2;   // Front knee
-      float qd3 = (_legController->datas[2].qd[1] + _legController->datas[3].qd[1])/2;   // Back hip
-      float qd4 = (_legController->datas[2].qd[2] + _legController->datas[3].qd[2])/2;   // Back knee
-      _q_act << q1, q2, q3, q4;
-      _qd_act << qd1, qd2, qd3, qd4;
-      _q_des = -_qdes_data[_bounding_step];     // hip and knee angles are opposite as in MATALAB
-      _qd_des =  -_qddes_data[_bounding_step];  
-      _tau_ff += _Kp_hip_knee*(_q_act - _q_des) + _Kd_hip_knee*(_qd_act - _qd_des);    
+  float qd1 = (_legController->datas[0].qd[1] + _legController->datas[1].qd[1])/2;   // Front hip
+  float qd2 = (_legController->datas[0].qd[2] + _legController->datas[1].qd[2])/2;   // Front knee
+  float qd3 = (_legController->datas[2].qd[1] + _legController->datas[3].qd[1])/2;   // Back hip
+  float qd4 = (_legController->datas[2].qd[2] + _legController->datas[3].qd[2])/2;   // Back knee
+  _q_act << q1, q2, q3, q4;
+  _qd_act << qd1, qd2, qd3, qd4;
+  _q_des = -_qdes_data[_bounding_step];     // hip and knee angles are opposite as in MATALAB
+  _qd_des =  -_qddes_data[_bounding_step];  
+  _tau_ff += _Kp_hip_knee*(_q_act - _q_des) + _Kd_hip_knee*(_qd_act - _qd_des);   
+  _tau_ff = _tau_ff/2;   
+
+  /* regulate roll motion*/
+  float tau_roll_fb, kp_roll = 30, kd_roll=5, dist;
+  _F_ff[0].setZero();
+  _F_ff[1].setZero();
+  _F_ff[2].setZero();
+  _F_ff[3].setZero();
+
+  tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaBody[0];
+  dist = -_legController->datas[0].p[2];
+
+  if (_stanceFlag[0]) {_F_ff[0][0] = -0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[1]) {_F_ff[1][0] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[2]) {_F_ff[2][0] = -0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[3]) {_F_ff[3][0] = 0.5*tau_roll_fb/dist; }
+
+      
+
+  for(int leg(0); leg<2; ++leg){
+      _legController->commands[leg].qDes[0] =  0;
+      _legController->commands[leg].qDes[1] =  -_qdes_data[_bounding_step][0];
+      _legController->commands[leg].qDes[2] =  -_qdes_data[_bounding_step][1];
+      _legController->commands[leg].qdDes[0] = 0;
+      _legController->commands[leg].qdDes[1] =  -_qddes_data[_bounding_step][0];   
+      _legController->commands[leg].qdDes[2] =  -_qddes_data[_bounding_step][1];
+      _legController->commands[leg].tauFeedForward[0] = 0;
+      _legController->commands[leg].tauFeedForward[1] = _tau_ff[0];
+      _legController->commands[leg].tauFeedForward[2] = _tau_ff[1];
+      _legController->commands[leg].kpJoint = kpMat;
+      _legController->commands[leg].kdJoint = kdMat;
+      _legController->commands[leg].forceFeedForward = _F_ff[leg];
     }
-    _tau_ff = _tau_ff/2;   
 
-    /* regulate roll motion*/
-    float tau_roll_fb, kp_roll = 30, kd_roll=5, dist;
-    _F_ff[0].setZero();
-    _F_ff[1].setZero();
-    _F_ff[2].setZero();
-    _F_ff[3].setZero();
-    
-    tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaBody[0];
-    dist = -_legController->datas[0].p[2];
-
-    if (_contactState[0]>0.2 and _contactState[1]>0.2)
-    {
-      _F_ff[0][0] = -0.5*tau_roll_fb/dist;
-      _F_ff[1][0] = 0.5*tau_roll_fb/dist;
+    for(int leg(2); leg<4; ++leg){
+      _legController->commands[leg].qDes[0] =  0;
+      _legController->commands[leg].qDes[1] =  -_qdes_data[_bounding_step][2];
+      _legController->commands[leg].qDes[2] =  -_qdes_data[_bounding_step][3];
+      _legController->commands[leg].qdDes[0] = 0;
+      _legController->commands[leg].qdDes[1] =  -_qddes_data[_bounding_step][2];   
+      _legController->commands[leg].qdDes[2] =  -_qddes_data[_bounding_step][3];         
+      _legController->commands[leg].tauFeedForward[0] = 0;
+      _legController->commands[leg].tauFeedForward[1] = _tau_ff[2];
+      _legController->commands[leg].tauFeedForward[2] = _tau_ff[3];  
+      _legController->commands[leg].kpJoint = kpMat;
+      _legController->commands[leg].kdJoint = kdMat;
+      _legController->commands[leg].forceFeedForward = _F_ff[leg];
     }
-    else if (_contactState[2]>0.2 and _contactState[3]>0.2)
-    {
-      _F_ff[2][0] = -0.5*tau_roll_fb/dist;
-      _F_ff[3][0] = 0.5*tau_roll_fb/dist;
-    }
-        
+               
 
-    for(int leg(0); leg<2; ++leg){
-        _legController->commands[leg].qDes[0] =  0;
-        _legController->commands[leg].qDes[1] =  -_qdes_data[_bounding_step][0];
-        _legController->commands[leg].qDes[2] =  -_qdes_data[_bounding_step][1];
-        _legController->commands[leg].qdDes[0] = 0;
-        _legController->commands[leg].qdDes[1] =  -_qddes_data[_bounding_step][0];   
-        _legController->commands[leg].qdDes[2] =  -_qddes_data[_bounding_step][1];
-        _legController->commands[leg].tauFeedForward[0] = 0;
-        _legController->commands[leg].tauFeedForward[1] = _tau_ff[0];
-        _legController->commands[leg].tauFeedForward[2] = _tau_ff[1];
-        _legController->commands[leg].kpJoint = kpMat;
-        _legController->commands[leg].kdJoint = kdMat;
-        _legController->commands[leg].forceFeedForward = _F_ff[leg];
-      }
-
-      for(int leg(2); leg<4; ++leg){
-        _legController->commands[leg].qDes[0] =  0;
-        _legController->commands[leg].qDes[1] =  -_qdes_data[_bounding_step][2];
-        _legController->commands[leg].qDes[2] =  -_qdes_data[_bounding_step][3];
-        _legController->commands[leg].qdDes[0] = 0;
-        _legController->commands[leg].qdDes[1] =  -_qddes_data[_bounding_step][2];   
-        _legController->commands[leg].qdDes[2] =  -_qddes_data[_bounding_step][3];         
-        _legController->commands[leg].tauFeedForward[0] = 0;
-        _legController->commands[leg].tauFeedForward[1] = _tau_ff[2];
-        _legController->commands[leg].tauFeedForward[2] = _tau_ff[3];  
-        _legController->commands[leg].kpJoint = kpMat;
-        _legController->commands[leg].kdJoint = kdMat;
-        _legController->commands[leg].forceFeedForward = _F_ff[leg];
-      }
-                 
-
-      _bounding_step ++;
+    _bounding_step ++;
 }
 
 void MHPC_Controller::jointPD_control(){
+  _contactState << 0.5,0.5,0.5,0.5;
+  _stateEstimator->setContactPhase(_contactState);
   Mat3<float> kpMat;
   Mat3<float> kdMat;
 
@@ -293,62 +325,71 @@ void MHPC_Controller::standUp_control_enter(){
 }
 
 void MHPC_Controller::standUp_control_run(){
-  iter_stand ++;
-  float hMax_back = 0.25;
-  // float hMax_front = 0.25;
-  Mat3<float>kpJoint = Vec3<float>(100, 50, 50).asDiagonal();
-  Mat3<float>kdJoint = Vec3<float>(5, 5, 5).asDiagonal();
+  iter_stand ++;  
   Mat3<float>kpCartesian = Vec3<float>(500, 500, 500).asDiagonal();
   Mat3<float>kdCartesian = Vec3<float>(8, 8, 8).asDiagonal();
 
-  float progress = 2 * iter_stand * _controlParameters->controller_dt;
+  float progress = iter_stand * _controlParameters->controller_dt;
 
   if (progress > 1.){ progress = 1.; }
 
-  for(int leg(0); leg<2; ++leg){
-          for(int jidx(0); jidx<3; ++jidx){
-            // float pos = 0.0;
-            _legController->commands[leg].qDes[jidx] =  userParameters.home_fleg[jidx];
-            _legController->commands[leg].qdDes[jidx] = 0.;
-            _legController->commands[leg].tauFeedForward[jidx] = 0;
-
-          }
-          _legController->commands[leg].pDes = _init_foot_pos[leg];
-          _legController->commands[leg].pDes[2] = 
-              progress*(-hMax_back) + (1. - progress) * _init_foot_pos[leg][2];
-
-          _legController->commands[leg].kpJoint = kpJoint;
-          _legController->commands[leg].kdJoint = kdJoint;
-          _legController->commands[leg].kpCartesian = kpCartesian;
-          _legController->commands[leg].kdCartesian = kdCartesian;
-        }
-
-        for(int leg(2); leg<4; ++leg){
-          for(int jidx(0); jidx<3; ++jidx){
-            // float pos = 0.0;
-            _legController->commands[leg].qDes[jidx] = userParameters.home_bleg[jidx];
-            _legController->commands[leg].qdDes[jidx] = 0.;
-            _legController->commands[leg].tauFeedForward[jidx] = 0;
-          }
-          _legController->commands[leg].pDes = _init_foot_pos[leg];
-          _legController->commands[leg].pDes[2] = 
-              progress*(-hMax_back) + (1. - progress) * _init_foot_pos[leg][2];
-
-          _legController->commands[leg].kpJoint = kpJoint;
-          _legController->commands[leg].kdJoint = kdJoint;
-          _legController->commands[leg].kpCartesian = kpCartesian;
-          _legController->commands[leg].kdCartesian = kdCartesian;
-        }
+  for(int leg(0); leg<4; ++leg){     
+    _standUp_pDes << 0, -0.062*pow(-1,leg), -0.25;     
+    _legController->commands[leg].pDes = progress*(_standUp_pDes) + 
+                        (1. - progress) * _init_foot_pos[leg];          
+    _legController->commands[leg].kpCartesian = kpCartesian;
+    _legController->commands[leg].kdCartesian = kdCartesian;
+  }       
 
 }
 
 void MHPC_Controller::standUp_control(){
+  _contactState << 0.5,0.5,0.5,0.5;
+  _stateEstimator->setContactPhase(_contactState);
   if (!_stand_up){
     standUp_control_enter();
     _stand_up = true;
   }
   else{standUp_control_run();}
 }
+
+void MHPC_Controller::preBounding_control_enter(){
+  for (int leg(0); leg < 4; ++leg)
+  {
+    _init_joint_pos[leg] = _legController->datas[leg].q;
+  }
+  iter_preBounding = 0;
+}
+
+void MHPC_Controller::preBounding_control_run(){
+  ++iter_preBounding;
+  float progress = 2 * iter_preBounding * _controlParameters->controller_dt;
+  if (progress > 1.){ progress = 1.; }
+
+  Mat3<float>kpJoint = Vec3<float>(100, 100, 100).asDiagonal();
+  Mat3<float>kdJoint = Vec3<float>(5, 5, 5).asDiagonal();  
+
+  for (int leg(0); leg < 4; ++leg)
+  {
+    _legController->commands[leg].qDes = progress*homeState.q.segment<3>(3*leg) + (1- progress)*_init_joint_pos[leg];
+    _legController->commands[leg].kpJoint = kpJoint;
+    _legController->commands[leg].kdJoint = kdJoint;
+  }
+}
+
+void MHPC_Controller::preBounding_control(){
+  _contactState << 0.5,0.5,0.5,0.5;
+  _stateEstimator->setContactPhase(_contactState);
+  if (!_preBounding)
+  {
+    preBounding_control_enter();
+    _preBounding = true;
+  }else{
+    preBounding_control_run();
+  }
+}
+
+
 
 void MHPC_Controller::read_tau_data()
 {
