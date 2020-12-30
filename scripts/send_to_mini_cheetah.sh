@@ -7,8 +7,10 @@ cd ${DIR}/../mc-build/
 rm -rf robot-software
 mkdir robot-software
 mkdir robot-software/build
+mkdir robot-software/uuser/MHPC_Controller
 #cp common/test-common robot-software/build
 cp $1 robot-software/build
+cp ../user/MHPC_Controller/*.txt ./robot-software/user/MHPC_Controller
 find . -name \*.so* -exec cp {} ./robot-software/build \;
 cp ../scripts/run_mc* ./robot-software/build
 cp ../scripts/setup_network_mc.py ./robot-software/build
