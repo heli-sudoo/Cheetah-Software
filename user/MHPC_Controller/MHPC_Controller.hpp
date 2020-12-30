@@ -117,7 +117,7 @@ class MHPC_Controller:public RobotController{
 
     int _sim_len;
     int _stanceTime[4];
-    int _duration[4] = {72,72,80,80};
+    int _duration[4] = {80,80,80,80};
     size_t _bounding_step;
     size_t _foot_ID[4] = {8,11,14,17};
     bool _bounding;

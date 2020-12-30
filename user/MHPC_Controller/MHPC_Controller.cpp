@@ -122,14 +122,14 @@ Vec4<float> MHPC_Controller::getContactState()
           _stanceFlag[leg] = 0;
           _stanceTime[leg] = 0;
         }
-        progress[leg] = 0.5;
+        // progress[leg] = 0.5;
         // if (takeoff_check(leg))
         // {
         //   progress[leg] = 0;
         //   _stanceFlag[leg] = 0;
         // }
       }
-      // progress[leg] = _stanceTime[leg]/_duration[leg]; // works but  estimation goes below ground
+      progress[leg] = _stanceTime[leg]/_duration[leg]; // works but  estimation goes below ground
     }
   }
   return progress;
@@ -138,7 +138,7 @@ Vec4<float> MHPC_Controller::getContactState()
       
 
 bool MHPC_Controller::touchDown_check(int leg){
-  return (_foot_vel_current[leg]-_foot_vel_prev[leg]).norm() > 0.6;
+  return (_foot_vel_current[leg]-_foot_vel_prev[leg]).norm() > 0.3;
 }
 
 bool MHPC_Controller::takeoff_check(int leg){
@@ -151,7 +151,7 @@ bool MHPC_Controller::takeoff_check(int leg){
   _state.qd << _legDatas[0].qd,_legDatas[1].qd,_legDatas[2].qd,_legDatas[3].qd; 
   _model->setState(_state);  
 
-  return _model->getLinearVelocity(_foot_ID[leg], _loc_foot)[2]>0.5;
+  return _model->getLinearVelocity(_foot_ID[leg], _loc_foot)[2]>0.7;
 }
 
 bool MHPC_Controller::goHome_check()
@@ -207,13 +207,15 @@ void MHPC_Controller::bounding_control_run(){
   // feedback control associated with x, z and pitch
   _K = _K_DDP_data[_bounding_step];
   _Kp_cart = _K.block<4,3>(0,0);
-  _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
+  _Kp_cart.block<4,1>(0,1) = Vec4<float>::Zero();
   _Kd_cart = _K.block<4,3>(0,7); 
+  // _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
   _pos_act << _stateEstimate->position[0], _stateEstimate->position[2], _stateEstimate->rpy[1];
   _pos_des = _pos_des_data[_bounding_step];
+  _pos_des[0] += 0.0927;
   _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaBody[1];
   _vel_des = _vel_des_data[_bounding_step];
-  _tau_ff += -0.2*(0*_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
+  _tau_ff += -0.2*(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
 
   // feedback control associated with q1, q2, q3, q4
   _Kp_hip_knee = _K.block<4,4>(0,3);
@@ -231,23 +233,33 @@ void MHPC_Controller::bounding_control_run(){
   _qd_act << qd1, qd2, qd3, qd4;
   _q_des = -_qdes_data[_bounding_step];     // hip and knee angles are opposite as in MATALAB
   _qd_des =  -_qddes_data[_bounding_step];  
-  _tau_ff += _Kp_hip_knee*(_q_act - _q_des) + _Kd_hip_knee*(_qd_act - _qd_des);   
+  _tau_ff += (_Kp_hip_knee*(_q_act - _q_des) + _Kd_hip_knee*(_qd_act - _qd_des));   
   _tau_ff = _tau_ff/2;   
 
   /* regulate roll motion*/
-  float tau_roll_fb, kp_roll = 30, kd_roll=5, dist;
+  float tau_roll_fb, kp_roll = 20, kd_roll=2, dist;
   _F_ff[0].setZero();
   _F_ff[1].setZero();
   _F_ff[2].setZero();
   _F_ff[3].setZero();
 
-  tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaBody[0];
-  dist = -_legController->datas[0].p[2];
+  tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaWorld[0];
+  dist = 0.05;
 
-  if (_stanceFlag[0]) {_F_ff[0][0] = -0.5*tau_roll_fb/dist; }
-  if (_stanceFlag[1]) {_F_ff[1][0] = 0.5*tau_roll_fb/dist; }
-  if (_stanceFlag[2]) {_F_ff[2][0] = -0.5*tau_roll_fb/dist; }
-  if (_stanceFlag[3]) {_F_ff[3][0] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[0]) {_F_ff[0][2] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[1]) {_F_ff[1][2] = -0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[2]) {_F_ff[2][2] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[3]) {_F_ff[3][2] = -0.5*tau_roll_fb/dist; }
+
+  /* regulate yaw motion */
+  float tau_yaw_fb, kp_yaw = 20, kd_yaw = 2;
+  tau_yaw_fb = -kp_yaw *_stateEstimate->rpy[2] - kd_yaw*_stateEstimate->omegaWorld[2];
+  dist = 0.25;
+  
+  if (_stanceFlag[0]) {_F_ff[0][1] += -0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[1]) {_F_ff[1][1] += -0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[2]) {_F_ff[2][1] += 0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[3]) {_F_ff[3][1] += 0.5*tau_yaw_fb/dist; }  
 
       
 
@@ -276,8 +288,8 @@ void MHPC_Controller::bounding_control_run(){
       _legController->commands[leg].tauFeedForward[0] = 0;
       _legController->commands[leg].tauFeedForward[1] = _tau_ff[2];
       _legController->commands[leg].tauFeedForward[2] = _tau_ff[3];  
-      _legController->commands[leg].kpJoint = kpMat;
-      _legController->commands[leg].kdJoint = kdMat;
+      _legController->commands[leg].kpJoint = 5*kpMat;
+      _legController->commands[leg].kdJoint = 3*kdMat;
       _legController->commands[leg].forceFeedForward = _F_ff[leg];
     }
                
