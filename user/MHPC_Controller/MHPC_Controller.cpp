@@ -195,11 +195,11 @@ void MHPC_Controller::bounding_control_run(){
     return;
   }
 
-  Mat3<float> kpMat;
-  Mat3<float> kdMat;
-
-  kpMat <<  50*userParameters.kp, 0, 0, 0, userParameters.kp, 0, 0, 0, userParameters.kp;
-  kdMat <<  5*userParameters.kd, 0, 0, 0, userParameters.kd, 0, 0, 0, userParameters.kd;
+  Mat3<float> kpMat_fleg = userParameters.kp_fleg.cast<float>().asDiagonal();
+  Mat3<float> kdMat_fleg = userParameters.kd_fleg.cast<float>().asDiagonal();
+  Mat3<float> kpMat_bleg = userParameters.kp_bleg.cast<float>().asDiagonal();
+  Mat3<float> kdMat_bleg = userParameters.kd_fleg.cast<float>().asDiagonal();
+  
 
   // set feedforward control
   _tau_ff = -_tau_ff_data[_bounding_step]; // sign opposite as in MATLB, magnitude takes half
@@ -215,7 +215,7 @@ void MHPC_Controller::bounding_control_run(){
   _pos_des[0] += 0.0927;
   _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaWorld[1];
   _vel_des = _vel_des_data[_bounding_step];
-  _tau_ff += -(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
+  _tau_ff += -0.1*(0*_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
 
   // feedback control associated with q1, q2, q3, q4
   _Kp_hip_knee = _K.block<4,4>(0,3);
@@ -273,8 +273,8 @@ void MHPC_Controller::bounding_control_run(){
       _legController->commands[leg].tauFeedForward[0] = 0;
       _legController->commands[leg].tauFeedForward[1] = _tau_ff[0];
       _legController->commands[leg].tauFeedForward[2] = _tau_ff[1];
-      _legController->commands[leg].kpJoint = kpMat;
-      _legController->commands[leg].kdJoint = kdMat;
+      _legController->commands[leg].kpJoint = kpMat_fleg;
+      _legController->commands[leg].kdJoint = kdMat_fleg;
       _legController->commands[leg].forceFeedForward = _F_ff[leg];
     }
 
@@ -288,8 +288,8 @@ void MHPC_Controller::bounding_control_run(){
       _legController->commands[leg].tauFeedForward[0] = 0;
       _legController->commands[leg].tauFeedForward[1] = _tau_ff[2];
       _legController->commands[leg].tauFeedForward[2] = _tau_ff[3];  
-      _legController->commands[leg].kpJoint = 8*kpMat;
-      _legController->commands[leg].kdJoint = 8*kdMat;
+      _legController->commands[leg].kpJoint = kpMat_bleg;
+      _legController->commands[leg].kdJoint = kdMat_bleg;
       _legController->commands[leg].forceFeedForward = _F_ff[leg];
     }
                
@@ -303,8 +303,8 @@ void MHPC_Controller::jointPD_control(){
   Mat3<float> kpMat;
   Mat3<float> kdMat;
 
-  kpMat <<  userParameters.kp, 0, 0, 0, userParameters.kp, 0, 0, 0, userParameters.kp;
-  kdMat <<  userParameters.kd, 0, 0, 0, userParameters.kd, 0, 0, 0, userParameters.kd;
+  kpMat <<  40, 0, 0, 0, 4, 0, 0, 0, 4;
+  kdMat <<  5, 0, 0, 0, 1, 0, 0, 0, 1;
 
   for(int leg(0); leg<2; ++leg){
           for(int jidx(0); jidx<3; ++jidx){
