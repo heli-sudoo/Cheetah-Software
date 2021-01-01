@@ -207,15 +207,15 @@ void MHPC_Controller::bounding_control_run(){
   // feedback control associated with x, z and pitch
   _K = _K_DDP_data[_bounding_step];
   _Kp_cart = _K.block<4,3>(0,0);
-  // _Kp_cart.block<4,1>(0,1) = Vec4<float>::Zero();
+  _Kp_cart.block<4,1>(0,1) = Vec4<float>::Zero();
   _Kd_cart = _K.block<4,3>(0,7); 
   // _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
   _pos_act << _stateEstimate->position[0], _stateEstimate->position[2], _stateEstimate->rpy[1];
   _pos_des = _pos_des_data[_bounding_step];
   _pos_des[0] += 0.0927;
-  _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaWorld[1];
+  _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaBody[1];
   _vel_des = _vel_des_data[_bounding_step];
-  _tau_ff += -0.1*(0*_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
+  _tau_ff += -0.5*(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
 
   // feedback control associated with q1, q2, q3, q4
   _Kp_hip_knee = _K.block<4,4>(0,3);
@@ -237,29 +237,29 @@ void MHPC_Controller::bounding_control_run(){
   _tau_ff = _tau_ff/2;   
 
   /* regulate roll motion*/
-  // float tau_roll_fb, kp_roll = 20, kd_roll=2, dist;
+  float tau_roll_fb, kp_roll = 20, kd_roll=2, dist;
   _F_ff[0].setZero();
   _F_ff[1].setZero();
   _F_ff[2].setZero();
   _F_ff[3].setZero();
 
-  // tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaWorld[0];
-  // dist = 0.05;
+  tau_roll_fb = -kp_roll*_stateEstimate->rpy[0] - kd_roll*_stateEstimate->omegaWorld[0];
+  dist = 0.05;
 
-  // if (_stanceFlag[0]) {_F_ff[0][2] = 0.5*tau_roll_fb/dist; }
-  // if (_stanceFlag[1]) {_F_ff[1][2] = -0.5*tau_roll_fb/dist; }
-  // if (_stanceFlag[2]) {_F_ff[2][2] = 0.5*tau_roll_fb/dist; }
-  // if (_stanceFlag[3]) {_F_ff[3][2] = -0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[0]) {_F_ff[0][2] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[1]) {_F_ff[1][2] = -0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[2]) {_F_ff[2][2] = 0.5*tau_roll_fb/dist; }
+  if (_stanceFlag[3]) {_F_ff[3][2] = -0.5*tau_roll_fb/dist; }
 
-  // /* regulate yaw motion */
-  // float tau_yaw_fb, kp_yaw = 20, kd_yaw = 2;
-  // tau_yaw_fb = -kp_yaw *_stateEstimate->rpy[2] - kd_yaw*_stateEstimate->omegaWorld[2];
-  // dist = 0.25;
+  /* regulate yaw motion */
+  float tau_yaw_fb, kp_yaw = 20, kd_yaw = 2;
+  tau_yaw_fb = -kp_yaw *_stateEstimate->rpy[2] - kd_yaw*_stateEstimate->omegaWorld[2];
+  dist = 0.25;
   
-  // if (_stanceFlag[0]) {_F_ff[0][1] += -0.5*tau_yaw_fb/dist; }
-  // if (_stanceFlag[1]) {_F_ff[1][1] += -0.5*tau_yaw_fb/dist; }
-  // if (_stanceFlag[2]) {_F_ff[2][1] += 0.5*tau_yaw_fb/dist; }
-  // if (_stanceFlag[3]) {_F_ff[3][1] += 0.5*tau_yaw_fb/dist; }  
+  if (_stanceFlag[0]) {_F_ff[0][1] += -0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[1]) {_F_ff[1][1] += -0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[2]) {_F_ff[2][1] += 0.5*tau_yaw_fb/dist; }
+  if (_stanceFlag[3]) {_F_ff[3][1] += 0.5*tau_yaw_fb/dist; }  
 
       
 
