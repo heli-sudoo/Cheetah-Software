@@ -207,15 +207,15 @@ void MHPC_Controller::bounding_control_run(){
   // feedback control associated with x, z and pitch
   _K = _K_DDP_data[_bounding_step];
   _Kp_cart = _K.block<4,3>(0,0);
-  _Kp_cart.block<4,1>(0,1) = Vec4<float>::Zero();
+  // _Kp_cart.block<4,1>(0,1) = Vec4<float>::Zero();
   _Kd_cart = _K.block<4,3>(0,7); 
   // _Kd_cart.block<4,1>(0,0) = Vec4<float>::Zero();
   _pos_act << _stateEstimate->position[0], _stateEstimate->position[2], _stateEstimate->rpy[1];
   _pos_des = _pos_des_data[_bounding_step];
   _pos_des[0] += 0.0927;
-  _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaBody[1];
+  _vel_act << _stateEstimate->vWorld[0], _stateEstimate->vWorld[2], _stateEstimate->omegaWorld[1];
   _vel_des = _vel_des_data[_bounding_step];
-  _tau_ff += -0.5*(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
+  _tau_ff += -0.4*(_Kp_cart*(_pos_act - _pos_des) + _Kd_cart * (_vel_act - _vel_des));
 
   // feedback control associated with q1, q2, q3, q4
   _Kp_hip_knee = _K.block<4,4>(0,3);
@@ -338,7 +338,7 @@ void MHPC_Controller::standUp_control_enter(){
 
 void MHPC_Controller::standUp_control_run(){
   iter_stand ++;  
-  Mat3<float>kpCartesian = Vec3<float>(500, 500, 500).asDiagonal();
+  Mat3<float>kpCartesian = Vec3<float>(700, 500, 500).asDiagonal();
   Mat3<float>kdCartesian = Vec3<float>(8, 8, 8).asDiagonal();
 
   float progress = iter_stand * _controlParameters->controller_dt;
