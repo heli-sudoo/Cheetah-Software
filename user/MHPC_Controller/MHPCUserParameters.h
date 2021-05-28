@@ -7,29 +7,31 @@ class MHPCUserParameters : public ControlParameters {
 public:
   MHPCUserParameters()
       : ControlParameters("user-parameters"),
-        INIT_PARAMETER(kp_fleg),
-        INIT_PARAMETER(kd_fleg),
-        INIT_PARAMETER(kp_bleg),
-        INIT_PARAMETER(kd_bleg),
-        INIT_PARAMETER(tau_ff),        
-        INIT_PARAMETER(zero),
-        INIT_PARAMETER(calibrate),
+        INIT_PARAMETER(kp_joint),
+        INIT_PARAMETER(kd_joint),
         INIT_PARAMETER(home_fleg),
         INIT_PARAMETER(home_bleg),
         INIT_PARAMETER(home_pos),
-        INIT_PARAMETER(home_rpy)
+        INIT_PARAMETER(home_rpy),
+        INIT_PARAMETER(n_wbphase),
+        INIT_PARAMETER(n_fbphase),
+        INIT_PARAMETER(dt_wb),
+        INIT_PARAMETER(dt_fb),
+        INIT_PARAMETER(cmode),
+        INIT_PARAMETER(groundH)
       {}
-  DECLARE_PARAMETER(Vec3<double>, kp_fleg);
-  DECLARE_PARAMETER(Vec3<double>, kd_fleg);
-  DECLARE_PARAMETER(Vec3<double>, kp_bleg);
-  DECLARE_PARAMETER(Vec3<double>, kd_bleg);
-  DECLARE_PARAMETER(double, tau_ff); 
-  DECLARE_PARAMETER(double, zero);
-  DECLARE_PARAMETER(double, calibrate);  
+  DECLARE_PARAMETER(Vec3<double>, kp_joint);
+  DECLARE_PARAMETER(Vec3<double>, kd_joint);
   DECLARE_PARAMETER(Vec3<double>, home_fleg);
   DECLARE_PARAMETER(Vec3<double>, home_bleg);
   DECLARE_PARAMETER(Vec3<double>, home_pos);
   DECLARE_PARAMETER(Vec3<double>, home_rpy);
+  DECLARE_PARAMETER(double, n_wbphase);
+  DECLARE_PARAMETER(double, n_fbphase);
+  DECLARE_PARAMETER(double, dt_wb);
+  DECLARE_PARAMETER(double, dt_fb);
+  DECLARE_PARAMETER(double, cmode);
+  DECLARE_PARAMETER(double, groundH);
 };
 
 #endif //PROJECT_MHPCUSERPARAMETERS_H

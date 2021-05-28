@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "RobotRunner.h"
-#include "Controllers/ContactEstimator.h"
+// #include "Controllers/ContactEstimator.h"
 #include "Controllers/OrientationEstimator.h"
 #include "Dynamics/Cheetah3.h"
 #include "Dynamics/MiniCheetah.h"
@@ -226,7 +226,7 @@ void RobotRunner::finalizeStep() {
 void RobotRunner::initializeStateEstimator(bool cheaterMode) {
   _stateEstimator->removeAllEstimators();  
   _stateEstimator->setModel(&_model);
-  _stateEstimator->addEstimator<ContactEstimator<float>>();
+  // _stateEstimator->addEstimator<ContactEstimator<float>>();
   Vec4<float> contactDefault;
   contactDefault << 0.5, 0.5, 0.5, 0.5;
   _stateEstimator->setContactPhase(contactDefault);

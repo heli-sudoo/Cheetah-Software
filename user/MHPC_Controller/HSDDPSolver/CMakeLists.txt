@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.10)
+
+# set C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+
+file(GLOB_RECURSE sources "source/*.cpp")
+
+add_library(hsddp SHARED ${sources})
+
+target_include_directories(hsddp PUBLIC
+								 "../Common/header"
+                                 "../Dynamics/header"
+                                 "header")
+
