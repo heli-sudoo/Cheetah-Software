@@ -1,65 +1,62 @@
-/*! @file ContactEstimator.h
- *  @brief All Contact Estimation Algorithms
- *
- *  This file will contain all contact detection algorithms. For now, it just
- * has a pass-through algorithm which passes the phase estimation to the state
- * estimator.  This will need to change once we move contact detection to C++
- *
- *  We also still need to establish conventions for "phase" and "contact".
- */
+# ifndef CONTACT_ESTIMATOR_H
+# define CONTACT_ESTIMATOR_H
 
-#ifndef PROJECT_CONTACTESTIMATOR_H
-#define PROJECT_CONTACTESTIMATOR_H
-
-#include "Controllers/StateEstimatorContainer.h"
 #include "Controllers/LegController.h"
 #include "Dynamics/FloatingBaseModel.h"
 #include "Dynamics/Quadruped.h"
+#include "Controllers/StateEstimatorContainer.h"
+#include "cppTypes.h"
+#include <vector>
 
-
-/*!
- * A "passthrough" contact estimator which returns the expected contact state
- */
 template <typename T>
-class ContactEstimator : public GenericEstimator<T>{
- public:
-  ContactEstimator():GenericEstimator<T>(){
-    // _state.bodyVelocity = SVec<T>::Zero();
-    // _state.bodyPosition = Vec3<T>::Zero();
-    // _state.bodyOrientation = Quat<T>::Zero();
-    // _state.q = DVec<T>::Zero(12);
-    // _state.qd = DVec<T>::Zero(12);
-  }
+class ContactEstimator
+{
+public:
+	ContactEstimator(FloatingBaseModel<T>* model,
+            Quadruped<T>* quadruped,
+            LegController<T>* legController,
+            StateEstimatorContainer<T>* stateEstimator,
+            StateEstimate<T>* stateEstimate,
+            RobotControlParameters* controlParameters);
+
+
+	void init();
+	void run_one_step();
+  Vec2<int> getTakeoffState2D();
+  Vec2<int> getTouchdownState2D();     
+private:
+	bool touchDown_Check(int leg);
+	bool takeOff_Check(int leg);
+	Vec4<T> getContactState();
+
+
+public:
+	Vec4<int> _first_takeoff;
+	Vec4<int> _stance_flag;
+	Vec4<int> _TD_flag;
+	Vec4<int> _TF_flag;
+	Vec4<T>   _contactState;
+	Vec4<int> _stancetime_exp; 	// expected stance time (# time steps) for each foot
+	Vec4<int> _stancetime; 		// track actual stance time (# time steps) for each foot
+	size_t 	  _foot_ID[4] = {8,11,14,17}; // foot ID according to mini cheetah link ID convention
  
 
-  /*!
-   * Set the estimated contact by copying the exptected contact state into the
-   * estimated contact state
-   */
-  // virtual void run(){}
 
-  virtual void run() {
+private:
+  FloatingBaseModel<T>* _model = nullptr;
+  Quadruped<T>* _quadruped = nullptr;
+  LegController<T>* _legController = nullptr;
+  StateEstimatorContainer<T>* _stateEstimator = nullptr;
+  StateEstimate<T>* _stateEstimate = nullptr;
+  FBModelState<T> _state;
+  LegControllerData<T> *_legDatas = nullptr;
+  RobotControlParameters* _controlParameters = nullptr;
 
-    this->_stateEstimatorData.result->contactEstimate =
-        *this->_stateEstimatorData.contactPhase;
-  }
+  std::vector<Vec3<T>> _foot_vel_curr;
+  std::vector<Vec3<T>> _foot_vel_prev;
+  Vec3<T> _loc_foot;
 
-  /*!
-   * Set up the contact estimator
-   */
-  virtual void setup(){}
-
-  private:
-  // FBModelState<T> _state; 
-  // Quadruped<T> *_robot;
-  // LegControllerData<T> *_legDatas;
-  // std::vector<Vec3<T>> world_foot_loc_old;
-  // std::vector<Vec3<T>> world_foot_loc_new;
-  // std::vector<Vec3<T>> world_foot_vel;
-  // size_t _foot_ID[4]; // FR FL HR HL
-  // T _diff[4];
-  // Vec3<T> _loc_foot;
 
 };
 
-#endif  // PROJECT_CONTACTESTIMATOR_H
+# endif // CONTACT_ESTIMATOR_H

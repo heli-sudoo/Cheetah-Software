@@ -379,6 +379,17 @@ Quat<T> so3ToQuat(Vec3<T>& so3) {
   quat[3] = so3[2] / theta * sin(theta / 2.);
   return quat;
 }
+ 
+template<typename Derived1, typename Derived2>
+Mat4<typename Derived1::Scalar> homoTransformation(const Eigen::DenseBase<Derived1> &R, const Eigen::DenseBase<Derived2> &v)
+  {
+      Mat4<typename Derived1::Scalar> H;
+      H.setZero();
+      H.topLeftCorner(3,3) = R;
+      H.topRightCorner(3,1) = v;
+      H(3,3) = 1;
+      return H;
+    }
 }  // namespace ori
 
 #endif  // LIBBIOMIMETICS_ORIENTATION_TOOLS_H
