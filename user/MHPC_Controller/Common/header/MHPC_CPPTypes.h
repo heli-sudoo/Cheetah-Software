@@ -1,7 +1,7 @@
 #ifndef MHPC_CPPTYPES_H
 #define MHPC_CPPTYPES_H
 
-#define EIGEN_NO_DEBUG 1 // Prevent Eigen from asserting dimension mismatch for speedup
+// #define EIGEN_NO_DEBUG 1 // Prevent Eigen from asserting dimension mismatch for speedup
 
 #define CALC_DYN_AND_PAR 0
 #define CALC_PARTIALS_ONLY 1

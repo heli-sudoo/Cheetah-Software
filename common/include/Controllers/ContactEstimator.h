@@ -12,6 +12,9 @@ template <typename T>
 class ContactEstimator
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+public:  
 	ContactEstimator(FloatingBaseModel<T>* model,
             Quadruped<T>* quadruped,
             LegController<T>* legController,

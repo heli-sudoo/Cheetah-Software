@@ -36,7 +36,8 @@ MHPCLocomotion<T>::MHPCLocomotion(MHPCUserParameters*params, HSDDP_OPTION<T>opti
     x0 << q0, qd0;
 
     /* initialize class members */
-    memory_alloc(); // allocate memory for data
+    memory_alloc(); // allocate memory for datafile(GLOB_RECURSE test_sources "test/test_*.cpp")             # test cpp files
+
 }
 
 template <typename T>
@@ -355,15 +356,15 @@ template <typename T>
 void MHPCLocomotion<T>::warmstart()
 {
     this->empty_bag();
-    DVec<T> x0 = this->_x0;
+    DVec<T> x0_phase = this->_x0;
     for (int idx = 0; idx < n_wbphase; idx++)
     {
         int pidx = pidx_WB[idx];
-        ms_act_WB[pidx][0].x = x0;
+        ms_act_WB[pidx][0].x = x0_phase;
         bounding_PDcontrol(wbmodel, ms_act_WB[pidx], mode_seq[idx], N_TIMESTEPS[idx]);
         if (idx + 1 < n_wbphase)
         {
-            x0 = this->phase_transition(this->_phases[idx], this->_phases[idx + 1]);
+            x0_phase = this->phase_transition(this->_phases[idx], this->_phases[idx + 1]);
         }
     }
     this->update_nominal_trajectory();

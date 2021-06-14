@@ -2,14 +2,15 @@
 #define MHPC_CONTROLLER
 
 #include <RobotController.h>
-#include "MHPCUserParameters.h"
 #include "MHPC_CPPTypes.h"
+#include "MHPCUserParameters.h"
 #include "MHPC_CompoundTypes.h"
 #include "Gait.h"
-#include "ControlFSM.h"
+// #include "ControlFSM.h"
 #include "Controllers/ContactEstimator.h"
 
 class MHPC_Controller:public RobotController{
+  
   public:
     MHPC_Controller():RobotController(){
       usrcmd.vel = 1.5;
@@ -19,7 +20,6 @@ class MHPC_Controller:public RobotController{
       usrcmd.yaw = 0;
     }
 
-
     virtual void initializeController();
     virtual void runController();
     virtual void updateVisualization(){}
@@ -27,16 +27,14 @@ class MHPC_Controller:public RobotController{
       return &userParameters;
     }
 
-
   public:
     USRCMD<casadi_real> usrcmd; // user command
 
-
   protected:
     MHPCUserParameters userParameters;
-    Gait<casadi_real> *_gait;
+    Gait<casadi_real> *_gait = nullptr;
     ContactEstimator<casadi_real> *_contactEstimator; // contact estimator by He Li
-    ControlFSM<casadi_real> *_controlFSM;
+    // ControlFSM<casadi_real> *_controlFSM;
 
 };
 

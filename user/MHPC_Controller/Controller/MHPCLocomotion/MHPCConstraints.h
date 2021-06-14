@@ -9,6 +9,10 @@
 template <typename T>
 class FBConstraint : public Constraint<T>
 {
+protected:// resolve problem of hidden overloaded functions
+    using Constraint<T>::terminal_constraint;
+    using Constraint<T>::path_constraint;
+
 public:
     FBConstraint(RobotBase<T> *model);
 
@@ -27,6 +31,10 @@ public:
     DMat<T> C_torque, C_joint, C_grf;
     DVec<T> b_torque, b_joint, b_grf;
     T  _friccoeff = 0.6; // static friction coefficient
+
+protected: // resolve problem of hidden overloaded functions
+    using Constraint<T>::terminal_constraint;
+    using Constraint<T>::path_constraint;
 
 public:
     WBConstraint(RobotBase<T> *model);

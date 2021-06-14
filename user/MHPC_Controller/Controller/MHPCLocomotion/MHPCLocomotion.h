@@ -18,6 +18,8 @@ class MHPCLocomotion:public MultiPhaseDDP<T>
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+public:
     MHPCLocomotion(MHPCUserParameters *Params, HSDDP_OPTION<T>option_in);                
     ~MHPCLocomotion();
     void warmstart() override; // override default warm_start

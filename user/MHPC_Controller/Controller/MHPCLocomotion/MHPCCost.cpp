@@ -1,5 +1,4 @@
 #include "MHPCCost.h"
-#include "CasadiGen.h"
 
 template <typename T>
 WBCost<T>::WBCost(T dt) : Cost<T, xsize_WB, usize_WB, ysize_WB>(dt, 4)
@@ -25,9 +24,9 @@ template <typename T>
 void WBCost<T>::set_weighting_matrices()
 {
     // Set weighting matrices for WB running and terminal cost
-    VecM<T, this->_xsize> q, qf[4];
-    VecM<T, this->_usize> r[4];
-    VecM<T, this->_ysize> s[4];
+    VecM<T, xsize_WB> q, qf[4];
+    VecM<T, usize_WB> r[4];
+    VecM<T, ysize_WB> s[4];
     q << 10, 10, 5, 4, 4, 4, 4, 2, 1, .01, 6, 6, 6, 6;
 
     qf[0] << 15, 20, 8, 3, 3, 3, 3, 3, 2, 0.01, 5, 5, 0.01, 0.01;

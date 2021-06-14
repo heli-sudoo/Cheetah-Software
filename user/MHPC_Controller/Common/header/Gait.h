@@ -1,9 +1,9 @@
-#ifndef GAIT
-#define GAIT
+#ifndef GAIT_H
+#define GAIT_H
 #include "MHPC_CPPTypes.h"
 #include<assert.h>
 #include<math.h>
-enum class GaitType
+enum class GaitType2D
 {
     STAND,
     BOUND,
@@ -12,7 +12,7 @@ enum class GaitType
 
 template<typename T>
 class Gait
-{
+{    
 private:
     DVec<int> _gait_mode;
     DVec<T>  _gait_timing;
@@ -26,11 +26,11 @@ public:
         _gait_timing = VecM<T,4>(0.08, 0.1, 0.08, 0.1);
     }
 
-    Gait(GaitType gait)
+    Gait(GaitType2D gait)
     {
         switch (gait) 
         {
-        case GaitType::BOUND:
+        case GaitType2D::BOUND:
             _gait_mode = VecM<int,4>(1,2,3,4);
             _gait_name = "BOUND";
             _gait_timing = VecM<T,4>(0.08, 0.1, 0.08, 0.1);
@@ -77,6 +77,5 @@ public:
         return timings;        
     }
 };
-
 
 #endif // GAIT
