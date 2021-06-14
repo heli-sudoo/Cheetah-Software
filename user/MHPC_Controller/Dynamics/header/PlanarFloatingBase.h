@@ -7,14 +7,22 @@
 template<typename T>
 class PlanarFloatingBase:public RobotBase<T>
 {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
-
     VecM<T,4> _foothold;
     VecM<T,2> _contact_state;
     VecM<T,xsize_FB> _xdot;
     MatMN<T,xsize_FB,xsize_FB> _Ac;
     MatMN<T,xsize_FB,usize_FB> _Bc; 
     FootholdPlanner<T> *_foothold_planner = nullptr;
+
+protected:
+    using RobotBase<T>::dynamics;
+    using RobotBase<T>::dynamics_par;
+    using RobotBase<T>::resetmap;
+    using RobotBase<T>::resetmap_par;
+    using RobotBase<T>::plan_foothold;
 
 public:
     PlanarFloatingBase(FootholdPlanner<T>* fplanner, T dt = 0.001):

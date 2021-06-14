@@ -1,5 +1,5 @@
 #ifndef CONSTRAINTSBASE_H
-# define CONSTRAINTSBASE_H
+#define CONSTRAINTSBASE_H
 
 #include "MHPC_CPPTypes.h"
 #include "MHPC_CompoundTypes.h"
@@ -18,21 +18,23 @@ protected:
     std::vector<size_t> _num_tconstr, _num_pconstr;
 
 public:
-    Constraint(){};
+    Constraint(){}
 
-    Constraint(RobotBase<T> *model) : _model(model){};
+    Constraint(RobotBase<T> *model) : _model(model){}
+
+    virtual ~ Constraint() = default;
 
     void get_AL_REB_PARAMS(AL_REB_PARAMETER<T> &param, int mode) { param = _params[mode - 1]; }
 
     size_t get_num_pconstraint(int modeidx) // get # pconstraint for mode modeidx
     {
-        assert((modeidx <= _num_pconstr.size() & modeidx > 0));
+        assert((modeidx <= _num_pconstr.size() && modeidx > 0));
         return _num_pconstr[modeidx - 1];
     }
 
     size_t get_num_tconstraint(int modeidx) // get # tconstraint for mode modeidx
     {
-        assert((modeidx <= _num_tconstr.size() & modeidx > 0));
+        assert((modeidx <= _num_tconstr.size() && modeidx > 0));
         return _num_tconstr[modeidx - 1];
     }
 

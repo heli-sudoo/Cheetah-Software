@@ -28,6 +28,7 @@ public:
                      size_t modeidx, size_t phaseidx);
 
     SinglePhaseAbstract(size_t xsize, size_t usize, size_t ysize);
+    virtual ~SinglePhaseAbstract() = default;
 
 public:
     void set_models(RobotBase<T> *model,

@@ -285,22 +285,22 @@ void SinglePhase<T, XSIZE, USIZE, YSIZE>::set_data_to_zero()
 
 template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
 void SinglePhase<T, XSIZE, USIZE, YSIZE>::reduced_barrier(
-    vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>> &Ineq, DVec<T> &delta, DVec<T> &B, DVec<T> &Bz, DVec<T> &Bzz)
+    vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>> &Ineq, DVec<T> &delta, DVec<T> &b, DVec<T> &bz, DVec<T> &bzz)
 {
     int k = 2; // order of approximating polynomial
-    for (size_t idx = 0; idx < B.size(); idx++)
+    for (size_t idx = 0; idx < b.size(); idx++)
     {
         if (Ineq[idx].g > delta[idx])
         {
-            B(idx) = -log(Ineq[idx].g);
-            Bz(idx) = -1.0 / Ineq[idx].g;
-            Bzz(idx) = pow(Ineq[idx].g, -2);
+            b[idx] = -log(Ineq[idx].g);
+            bz[idx] = -1.0 / Ineq[idx].g;
+            bzz[idx] = pow(Ineq[idx].g, -2);
         }
         else
         {
-            B(idx) = (double)(k - 1) / k * (pow((Ineq[idx].g - k * delta(idx)) / ((k - 1) * delta(idx)), k) - 1) - log(delta(idx));
-            Bz(idx) = pow((Ineq[idx].g - k * delta(idx)) / ((k - 1) * delta(idx)), (k - 1)) / delta(idx);
-            Bzz(idx) = pow((Ineq[idx].g - k * delta(idx)) / ((k - 1) * delta(idx)), k - 2);
+            b[idx] = (double)(k - 1) / k * (pow((Ineq[idx].g - k * delta[idx]) / ((k - 1) * delta[idx]), k) - 1) - log(delta[idx]);
+            bz[idx] = pow((Ineq[idx].g - k * delta[idx]) / ((k - 1) * delta[idx]), (k - 1)) / delta[idx];
+            bzz[idx] = pow((Ineq[idx].g - k * delta[idx]) / ((k - 1) * delta[idx]), k - 2);
         }
     }
 }

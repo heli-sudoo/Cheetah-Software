@@ -17,6 +17,7 @@ public:
     MultiPhaseDDP() {} // default constructor
     MultiPhaseDDP(int n_phases,
                   HSDDP_OPTION<T> &option);        
+    virtual ~MultiPhaseDDP() = default;
     
     void set_option(HSDDP_OPTION<T> &option) {_option = option;}
     

@@ -26,6 +26,9 @@ private:
     size_t _num_pconstr, _num_tconstr;
     AL_REB_PARAMETER<T> _param; // AL and ReB parameter for current phase
 
+protected: // resolve problem of hidden overloadded function
+    using SinglePhaseAbstract<T>::set_data;
+    using SinglePhaseAbstract<T>::set_reference;
 
 public:
     // EIGEN_MAKE_ALIGNED_OPERATOR_NEW

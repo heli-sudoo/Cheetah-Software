@@ -23,7 +23,9 @@ public:
 
 public:
     RobotBase(T dt, size_t xsize, size_t usize, size_t ysize, ModelType mtype): _dt(dt),
-    _qsize(xsize/2),_xsize(xsize), _usize(usize), _ysize(ysize) {_mtype = mtype;};
+    _qsize(xsize/2),_xsize(xsize), _usize(usize), _ysize(ysize) {_mtype = mtype;}
+
+    virtual ~RobotBase() = default;
 
     ModelType get_model_type() {return _mtype;}
     

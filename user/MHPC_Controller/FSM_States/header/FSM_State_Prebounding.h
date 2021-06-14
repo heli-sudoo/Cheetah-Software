@@ -10,6 +10,10 @@
  */
 template <typename T>
 class FSM_State_Prebounding: public FSM_State<T> {
+
+ public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // overload new operator to avoid alignment issue
+
  public:
   FSM_State_Prebounding(ControlFSMData<T>* controlFSMData);
 

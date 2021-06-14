@@ -31,7 +31,7 @@ void MultiPhaseDDP<T>::forward_sweep(T eps)
     DVec<T> x0 = _x0;       // initial condition of first phase equal to the inital condition of the multi-phase problem
     _tconstr_violation = 0; // initialize terminal constraint violation
 
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         _phases[pidx]->set_initial_condition(x0);
         _phases[pidx]->forward_sweep(eps);
@@ -59,7 +59,7 @@ void MultiPhaseDDP<T>::forward_sweep_dynamics_only(T eps)
     DVec<T> x0 = _x0;       // initial condition of first phase equal to the inital condition of the multi-phase problem
     _tconstr_violation = 0; // initialize terminal constraint violation
 
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         _phases[pidx]->set_initial_condition(x0);
         _phases[pidx]->forward_sweep_dynamics_only(eps);
@@ -84,7 +84,7 @@ template <typename T>
 void MultiPhaseDDP<T>::forward_sweep_partials_only()
 {
 
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         _phases[pidx]->forward_sweep_partials_only();
     }
@@ -382,7 +382,7 @@ DVec<T> MultiPhaseDDP<T>::phase_transition(SinglePhaseAbstract<T> *cPhase, Singl
 template <typename T>
 void MultiPhaseDDP<T>::empty_bag()
 {
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         if (!_phases[pidx])
         {
@@ -393,7 +393,7 @@ void MultiPhaseDDP<T>::empty_bag()
 template <typename T>
 void MultiPhaseDDP<T>::update_nominal_trajectory()
 {
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         if (nullptr != _phases[pidx])
         {
@@ -405,7 +405,7 @@ void MultiPhaseDDP<T>::update_nominal_trajectory()
 template <typename T>
 void MultiPhaseDDP<T>::update_AL_ReB_param()
 {
-    for (size_t pidx = 0; pidx < _n_phases; pidx++)
+    for (int pidx = 0; pidx < _n_phases; pidx++)
     {
         if (nullptr != _phases[pidx])
         {

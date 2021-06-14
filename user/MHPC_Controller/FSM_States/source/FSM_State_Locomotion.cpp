@@ -76,7 +76,7 @@ FSM_StateName FSM_State_Locomotion<T>::checkTransition()
 template <typename T>
 void FSM_State_Locomotion<T>::onExit()
 {
-		
+		iter = 0;
 }
 
 template <typename T>

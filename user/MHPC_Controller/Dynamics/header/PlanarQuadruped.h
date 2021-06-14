@@ -53,6 +53,13 @@ private:
     MatMN<T, xsize_WB, usize_WB> _Bc;
     VecM<T, xsize_WB> _xdot;
 
+protected:
+    using RobotBase<T>::dynamics;
+    using RobotBase<T>::dynamics_par;
+    using RobotBase<T>::resetmap;
+    using RobotBase<T>::resetmap_par;
+    using RobotBase<T>::plan_foothold;
+
 public:
     void dynamics(VecM<T, xsize_WB> &x, VecM<T, usize_WB> &u, VecM<T, xsize_WB> &x_next, VecM<T, ysize_WB> &y, int mode) override;
     void resetmap(VecM<T, xsize_WB> &x, VecM<T, xsize_WB> &x_next, VecM<T, ysize_WB> &y, int mode) override;
@@ -70,6 +77,7 @@ public:
     VecM<T,2> get_leg_ext_vec(VecM<T, qsize_WB> q, int legidx);
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     T bodyMass, hipLinkMass, kneeLinkMass; // currently not used
     T bodyLength, hipLinkLength, kneeLinkLength;
     T bodyWidth, hipLinkWidth, kneeLinkWidth;

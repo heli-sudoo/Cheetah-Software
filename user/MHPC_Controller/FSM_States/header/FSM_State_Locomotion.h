@@ -13,7 +13,9 @@ template<typename T>
 class FSM_State_Locomotion:public FSM_State<T>
 {
 public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // overload new operator to avoid alignment issue
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW  // overload new operator to avoid alignment issue
+
+public:
 	FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData);
   ~FSM_State_Locomotion()
   {

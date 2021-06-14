@@ -6,6 +6,8 @@
 template <typename T>
 class FootholdPlanner
 {
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW    
 private:
     T _velcmd; // desired forward speed
     T _ground_height;

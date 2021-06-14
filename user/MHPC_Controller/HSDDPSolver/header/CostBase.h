@@ -10,6 +10,8 @@ template <typename T>
 class CostAbstract
 {
 public:
+    virtual ~ CostAbstract() = default;
+
     virtual void running_cost(ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
                               ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
                               RCostStruct<T, xsize_WB, usize_WB, ysize_WB> &, int) {}
@@ -51,14 +53,23 @@ public:
     MatMN<T, XSIZE, XSIZE> *_Q = nullptr, *_Qf = nullptr;
     MatMN<T, USIZE, USIZE> *_R = nullptr;
     MatMN<T, YSIZE, YSIZE> *_S = nullptr;
-    size_t _n_modes;
+    int _n_modes;
     static constexpr size_t _xsize = XSIZE, _usize = USIZE, _ysize = YSIZE;
 
 public:
-    Cost(T dt, size_t n_modes) : _dt(dt), _n_modes(n_modes) {}
+    Cost(T dt=0.001, int n_modes=4):_dt(dt), _n_modes(n_modes) {}
 
-    virtual void set_weighting_matrices(){};
+    virtual void set_weighting_matrices(){}
 
+protected:
+    using CostAbstract<T>::running_cost; // resolve problem of hidden overloaded functions
+    using CostAbstract<T>::running_cost_par;
+    using CostAbstract<T>::terminal_cost;
+    using CostAbstract<T>::terminal_cost_par;
+
+public:
+    virtual ~Cost() = default;
+    
     void running_cost(ModelState<T, XSIZE, USIZE, YSIZE> &,
                       ModelState<T, XSIZE, USIZE, YSIZE> &,
                       RCostStruct<T, XSIZE, USIZE, YSIZE> &, int) override;
@@ -75,17 +86,6 @@ public:
                            ModelState<T, XSIZE, USIZE, YSIZE> &,
                            TCostStruct<T, XSIZE> &, int) override;
 
-    ~Cost()
-    {
-        delete[] _Q;
-        _Q = nullptr;
-        delete[] _R;
-        _R = nullptr;
-        delete[] _S;
-        _S = nullptr;
-        delete[] _Qf;
-        _Qf = nullptr;
-    }
 };
 
 #endif // COSTBASE_H

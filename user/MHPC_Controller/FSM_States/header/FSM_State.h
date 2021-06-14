@@ -41,6 +41,8 @@ class FSM_State {
   FSM_State(ControlFSMData<T>* _controlFSMData, FSM_StateName stateNameIn,
             std::string stateStringIn);
 
+  virtual ~FSM_State() = default;
+
   // Behavior to be carried out when entering a state
   virtual void onEnter() = 0;// {}
 
