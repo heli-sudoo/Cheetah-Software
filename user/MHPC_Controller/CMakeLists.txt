@@ -7,9 +7,20 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # disable some warninigs that have been verified having no problems
-set(CMAKE_CXX_FLAGS "-Wno-unused-parameter -Wno-return-type")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}\
+					 -Wno-unused -Wno-error=unused\
+					 -Wno-return-type -Wno-error=return-type\
+					 -Wno-sign-compare -Wno-error=sign-compare\
+					 -Wno-switch -Wno-error=switch\
+					 -Wno-reorder -Wno-error=reorder")
+					 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}\
+					 -Wno-unused -Wno-error=unused\
+					 -Wno-return-type -Wno-error=return-type\
+					 -Wno-sign-compare -Wno-error=sign-compare\
+					 -Wno-switch -Wno-error=switch")
 
-include_directories(${CMAKE_SOURCE_DIR}) # directory where toppest CMakeLists.txt is located
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories("../../robot/include")
 include_directories("../../common/include/")
@@ -25,16 +36,19 @@ add_subdirectory(CasadiGen)
 add_subdirectory(Dynamics)
 add_subdirectory(HSDDPSolver)
 
-file(GLOB_RECURSE sources "FSM_States/source/*.cpp"
-						  "Controller/MHPCLocomotion/*.cpp"
+# "FSM_States/source/*.cpp"
+
+file(GLOB_RECURSE sources "Utils/*.cpp"
 						  "Controller/Heuristics/*.cpp"
-						  "Utils/*.cpp")
+						  "Controller/MHPCLocomotion/*.cpp")
 
-add_executable(mhpc_ctrl ${sources} main.cpp MHPC_Controller.cpp)
-
-target_link_libraries(mhpc_ctrl casadigen dynamics hsddp)
+add_executable(mhpc_ctrl main.cpp MHPC_Controller.cpp ${sources})
 target_link_libraries(mhpc_ctrl robot biomimetics)
+target_link_libraries(mhpc_ctrl casadigen dynamics hsddp)
 target_link_libraries(mhpc_ctrl dynacore_param_handler)
 
+
+# cmake test for debugging
+add_subdirectory(test)
 
 
