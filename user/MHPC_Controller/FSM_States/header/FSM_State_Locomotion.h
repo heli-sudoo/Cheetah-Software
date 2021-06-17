@@ -8,6 +8,7 @@
 #include "MHPCLocomotion.h"
 #include "MHPCUserParameters.h"
 #include "ControlFSMData.h"
+#include <string>
 
 template<typename T>
 class FSM_State_Locomotion:public FSM_State<T>
@@ -69,6 +70,7 @@ public:
   MatMN<T,4,14>* K_DDP_buf = nullptr;
   MHPCLocomotion<T> *mhpc = nullptr;
   MHPCUserParameters * userParams = nullptr;
+  std::string OFFLINE_DATA_DIR;
 
 };
 #endif // FSM_STATE_LOCOMOTION_H

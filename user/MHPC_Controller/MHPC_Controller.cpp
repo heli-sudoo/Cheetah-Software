@@ -8,16 +8,16 @@ void MHPC_Controller::initializeController()
                                                         _legController, _stateEstimator,
                                                         _stateEstimate, _controlParameters);
 
-  // _controlFSM = new ControlFSM<casadi_real>(_quadruped,
-  //                                            _stateEstimator,
-  //                                            _legController,
-  //                                            _gait,
-  //                                            _desiredStateCommand,
-  //                                            &usrcmd,
-  //                                            _contactEstimator,
-  //                                            _controlParameters,
-  //                                            &userParameters,
-  //                                            _visualizationData);
+  _controlFSM = new ControlFSM<casadi_real>(_quadruped,
+                                             _stateEstimator,
+                                             _legController,
+                                             _gait,
+                                             _desiredStateCommand,
+                                             &usrcmd,
+                                             _contactEstimator,
+                                             _controlParameters,
+                                             &userParameters,
+                                             _visualizationData);
 }
 
 void MHPC_Controller::runController()

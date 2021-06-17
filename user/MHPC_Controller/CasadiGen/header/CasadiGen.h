@@ -30,12 +30,13 @@
 /*
   @brief: Get the numerical evaluation of a CasadiGen function and the output sparsity pattern
   @params: 
-          arg: casadi_real ptr to an array of pointers whose element points to an input variable
-          res: casadi_real ptr to an array of pointers whose element points to an output variable
+          arg: T ptr to an array of pointers whose element points to an input variable
+          res: T ptr to an array of pointers whose element points to an output variable
           max_sz_res: maximum size of output variables
 */
-void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int max_sz_res,
-                      int f(const casadi_real **, casadi_real **, int_T *, casadi_real *, int),
+template<typename T>
+void casadi_interface(vector<T *> ARG, vector<T *> RES, int max_sz_res,
+                      int f(const T **, T **, int_T *, T *, int),
                       const int_T *f_sparse_out(int_T),
                       int f_work(int_T *, int_T *, int_T *, int_T *));
 

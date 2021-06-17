@@ -6,7 +6,7 @@
 #include "MHPCUserParameters.h"
 #include "MHPC_CompoundTypes.h"
 #include "Gait.h"
-// #include "ControlFSM.h"
+#include "ControlFSM.h"
 #include "Controllers/ContactEstimator.h"
 
 class MHPC_Controller:public RobotController{
@@ -34,7 +34,7 @@ class MHPC_Controller:public RobotController{
     MHPCUserParameters userParameters;
     Gait<casadi_real> *_gait = nullptr;
     ContactEstimator<casadi_real> *_contactEstimator; // contact estimator by He Li
-    // ControlFSM<casadi_real> *_controlFSM;
+    ControlFSM<casadi_real> *_controlFSM;
 
 };
 

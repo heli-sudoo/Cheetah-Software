@@ -36,11 +36,11 @@ add_subdirectory(CasadiGen)
 add_subdirectory(Dynamics)
 add_subdirectory(HSDDPSolver)
 
-# "FSM_States/source/*.cpp"
 
 file(GLOB_RECURSE sources "Utils/*.cpp"
 						  "Controller/Heuristics/*.cpp"
-						  "Controller/MHPCLocomotion/*.cpp")
+						  "Controller/MHPCLocomotion/*.cpp"
+						  "FSM_States/source/*.cpp")
 
 add_executable(mhpc_ctrl main.cpp MHPC_Controller.cpp ${sources})
 target_link_libraries(mhpc_ctrl robot biomimetics)

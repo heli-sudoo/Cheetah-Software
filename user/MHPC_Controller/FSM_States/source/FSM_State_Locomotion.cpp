@@ -5,7 +5,8 @@ template <typename T>
 FSM_State_Locomotion<T>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData)
     : FSM_State<T>(_controlFSMData, FSM_StateName::LOCOMOTION, "LOCOMOTION")
 {
-	K_DDP_buf = new MatMN<T,4,14> [200]; // allocate sufficient memory to store pre-computed feedback gain
+	K_DDP_buf = new MatMN<T,4,14> [4000]; // allocate sufficient memory to store pre-computed feedback gain
+  OFFLINE_DATA_DIR = "/home/wensinglab/Cheetah-Software-MHPC/user/MHPC_Controller/PreComputeData/";
 	read_tau_data();
 	read_qdes_data();
 	read_qddes_data();
@@ -121,43 +122,43 @@ void FSM_State_Locomotion<T>::offline_controller()
 template <typename T>
 void FSM_State_Locomotion<T>::read_tau_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/torque_HSDDP.txt";
-  read_data4(FILENAME, tau_ff_buf);
+  std::string FILENAME = "torque_HSDDP.txt";
+  read_data4(OFFLINE_DATA_DIR+FILENAME, tau_ff_buf);
 }
 
 template <typename T>
 void FSM_State_Locomotion<T>::read_qdes_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/qdes_HSDDP.txt";
-  read_data4(FILENAME, qdes_buf);
+  std::string FILENAME = "qdes_HSDDP.txt";
+  read_data4(OFFLINE_DATA_DIR+FILENAME, qdes_buf);
 }
 
 template <typename T>
 void FSM_State_Locomotion<T>::read_qddes_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/qddes_HSDDP.txt";
-  read_data4(FILENAME, qddes_buf);
+  std::string FILENAME = "qddes_HSDDP.txt";
+  read_data4(OFFLINE_DATA_DIR+FILENAME, qddes_buf);
 }
 
 template <typename T>
 void FSM_State_Locomotion<T>::read_pos_des_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/pos_des_HSDDP.txt";
-  read_data3(FILENAME, pos_des_buf);
+  std::string FILENAME = "pos_des_HSDDP.txt";
+  read_data3(OFFLINE_DATA_DIR+FILENAME, pos_des_buf);
 }
 
 template <typename T>
 void FSM_State_Locomotion<T>::read_vel_des_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/vel_des_HSDDP.txt";
-  read_data3(FILENAME, vel_des_buf);
+  std::string FILENAME = "vel_des_HSDDP.txt";
+  read_data3(OFFLINE_DATA_DIR+FILENAME, vel_des_buf);
 }
 
 template <typename T>
 void FSM_State_Locomotion<T>::read_fb_gain_data()
 {
-  const char* FILENAME = "../user/MHPC_Controller/PreComputeData/K_HSDDP.txt";
-  read_fb_mat_data(FILENAME, K_DDP_buf);
+  std::string FILENAME = "K_HSDDP.txt";
+  read_fb_mat_data(OFFLINE_DATA_DIR+FILENAME, K_DDP_buf);
 }
 
 // template class FSM_State_Locomotion<double>;

@@ -5,7 +5,7 @@ extern "C" {
 #endif
 
 #ifndef casadi_real
-#define casadi_real double
+#define casadi_real float
 #endif
 
 #ifndef casadi_int

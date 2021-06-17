@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #ifndef casadi_real
-#define casadi_real double
+#define casadi_real float
 #endif
 
 #ifndef casadi_int
@@ -63,10 +63,10 @@ casadi_real* casadi_from_mex(const mxArray* p, casadi_real* y, const casadi_int*
   casadi_int nrow, ncol, is_sparse, c, k, p_nrow, p_ncol;
   const casadi_int *colind, *row;
   mwIndex *Jc, *Ir;
-  const double* p_data;
+  const float* p_data;
   if (!mxIsDouble(p) || mxGetNumberOfDimensions(p)!=2)
     mexErrMsgIdAndTxt("Casadi:RuntimeError",
-      "\"from_mex\" failed: Not a two-dimensional matrix of double precision.");
+      "\"from_mex\" failed: Not a two-dimensional matrix of float precision.");
   nrow = *sp++;
   ncol = *sp++;
   colind = sp;
@@ -80,10 +80,10 @@ casadi_real* casadi_from_mex(const mxArray* p, casadi_real* y, const casadi_int*
     Jc = mxGetJc(p);
     Ir = mxGetIr(p);
   }
-  p_data = (const double*)mxGetData(p);
+  p_data = (const float*)mxGetData(p);
   if (p_nrow==1 && p_ncol==1) {
     casadi_int nnz;
-    double v = is_sparse && Jc[1]==0 ? 0 : *p_data;
+    float v = is_sparse && Jc[1]==0 ? 0 : *p_data;
     nnz = sp[ncol];
     casadi_fill(y, nnz, v);
   } else {
@@ -123,7 +123,7 @@ casadi_real* casadi_from_mex(const mxArray* p, casadi_real* y, const casadi_int*
 
 #endif
 
-#define casadi_to_double(x) ((double) x)
+#define casadi_to_float(x) ((float) x)
 
 #ifdef MATLAB_MEX_FILE
 mxArray* casadi_to_mex(const casadi_int* sp, const casadi_real* x) {
@@ -133,7 +133,7 @@ mxArray* casadi_to_mex(const casadi_int* sp, const casadi_real* x) {
 #endif
   const casadi_int *colind, *row;
   mxArray *p;
-  double *d;
+  float *d;
 #ifndef CASADI_MEX_NO_SPARSE
   casadi_int i;
   mwIndex *j;
@@ -149,18 +149,18 @@ mxArray* casadi_to_mex(const casadi_int* sp, const casadi_real* x) {
     for (i=0, j=mxGetJc(p); i<=ncol; ++i) *j++ = *colind++;
     for (i=0, j=mxGetIr(p); i<nnz; ++i) *j++ = *row++;
     if (x) {
-      d = (double*)mxGetData(p);
-      for (i=0; i<nnz; ++i) *d++ = casadi_to_double(*x++);
+      d = (float*)mxGetData(p);
+      for (i=0; i<nnz; ++i) *d++ = casadi_to_float(*x++);
     }
     return p;
   }
 #endif /* CASADI_MEX_NO_SPARSE */
   p = mxCreateDoubleMatrix(nrow, ncol, mxREAL);
   if (x) {
-    d = (double*)mxGetData(p);
+    d = (float*)mxGetData(p);
     for (c=0; c<ncol; ++c) {
       for (k=colind[c]; k<colind[c+1]; ++k) {
-        d[row[k]+c*nrow] = casadi_to_double(*x++);
+        d[row[k]+c*nrow] = casadi_to_float(*x++);
       }
     }
   }

@@ -8,18 +8,18 @@
 #include "Controllers/StateEstimatorContainer.h"
 #include "Controllers/LegController.h"
 #include <vector>
-
+#include <string>
 template<typename T>
 Vec14<T> Convert3DEstimateTo2D(const StateEstimate<T> *stateEstimate, const LegControllerData<T> *legdata);
 
 template<typename T>
-void read_data4(const char* FILENAME, std::vector<Vec4<T>>&V);
+void read_data4(std::string FILENAME, std::vector<Vec4<T>>&V);
 
 template<typename T>
-void read_data3(const char* FILENAME, std::vector<Vec3<T>>&V);
+void read_data3(std::string FILENAME, std::vector<Vec3<T>>&V);
 
 template<typename T>
-void read_fb_mat_data(const char* FILENAME, MatMN<T,4,14>* K);
+void read_fb_mat_data(std::string FILENAME, MatMN<T,4,14>* K);
 
 template<typename T>
 void Convert2DStateTo3D(FBModelState<T> &state, Vec14<T> & x2D) {}

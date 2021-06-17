@@ -1,13 +1,20 @@
+#include "MHPC_CPPTypes.h" // overwrite casadi_real in casadi generated functions
 #include "CasadiGen.h"
-void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int max_sz_res,
-                      int f(const casadi_real **, casadi_real **, int_T *, casadi_real *, int),
+template<typename T>
+void casadi_interface(vector<T *> ARG, vector<T *> RES, int max_sz_res,
+                      int f(const T **, T **, int_T *, T *, int),
                       const int_T *f_sparse_out(int_T),
                       int f_work(int_T *, int_T *, int_T *, int_T *))
 {
     // function evaluation
-    casadi_real *arg[ARG.size()], *res[RES.size()];
+    // T **arg = nullptr;
+    // T **res = nullptr;
+    // arg = new T* [ARG.size()];
+    // res = new T* [RES.size()]; 
+    T *arg[ARG.size()];
+    T *res[RES.size()];       
     int_T sz_arg, sz_res, n_arg, n_res, sz_iw, sz_w, *iw = nullptr;
-    casadi_real *w = nullptr;
+    T *w = nullptr;
 
     // get the size of each input and output variables
     f_work(&sz_arg, &sz_res, &sz_iw, &sz_w);
@@ -22,14 +29,14 @@ void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int 
 
     for (size_t idx_res = 0; idx_res < RES.size(); idx_res++)
     {
-        res[idx_res] = new casadi_real[max_sz_res];
+        res[idx_res] = new T[max_sz_res];
     }    
        
-    iw = new int_T[sz_iw];
-    w = new casadi_real[sz_w];
+    iw = new int_T[0];
+    w = new T[0];
 
     // get function output
-    f((const casadi_real **)arg, res, iw, w, 1);
+    f((const T **)arg, res, iw, w, 1);
 
     // get sparsity pattern
     const int_T *sppattern;
@@ -47,7 +54,7 @@ void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int 
         rowinfo = colinfo + ncol + 1;
         nnz = colinfo[ncol];
 
-        // get data from res to RES
+        // copy data from res to RES
         int nzidx = 0;
         for (int colidx = 0; colidx < ncol; colidx++)
         {   
@@ -61,7 +68,6 @@ void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int 
         
     }
     
-    // delete dynamic memory
     if(nullptr != iw) delete [] iw;
     if(nullptr !=w) delete [] w;
 
@@ -69,5 +75,9 @@ void casadi_interface(vector<casadi_real *> ARG, vector<casadi_real *> RES, int 
     {
         if(nullptr != res[idx_res]) delete [] res[idx_res];
     }
-
 }
+
+template void casadi_interface<casadi_real> (vector<casadi_real *> ARG, vector<casadi_real *> RES, int max_sz_res,
+                                             int f(const casadi_real **, casadi_real **, int_T *, casadi_real *, int),
+                                             const int_T *f_sparse_out(int_T),
+                                             int f_work(int_T *, int_T *, int_T *, int_T *));

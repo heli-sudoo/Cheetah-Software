@@ -27,8 +27,8 @@ void SinglePhase<T, XSIZE, USIZE, YSIZE>::initialization()
 {
     _num_pconstr = this->_constraint->get_num_pconstraint(this->_modeidx);
     _num_tconstr = this->_constraint->get_num_tconstraint(this->_modeidx);      
-    _pconstr.resize(_num_pconstr);
-    _tconstr.resize(_num_tconstr);
+    _pconstr.reserve(_num_pconstr);
+    _tconstr.reserve(_num_tconstr);
     B.setZero(_num_pconstr);
     Bz.setZero(_num_pconstr);
     Bzz.setZero(_num_pconstr);

@@ -26,7 +26,7 @@ if(MINI_CHEETAH_BUILD)
   -Wextra -Wcast-align -Wdisabled-optimization -Wformat=2 \
   -Winit-self -Wmissing-include-dirs -Woverloaded-virtual \
   -Wshadow -Wsign-promo -Werror")
-  set(CMAKE_C_FLAGS "-O3  -ggdb -std=gnu99 -I.")
+  set(CMAKE_C_FLAGS "-O3 -ggdb -std=gnu99 -I.")
   message("**** Mini-Cheetah build enabled ****")
 else(MINI_CHEETAH_BUILD)
   SET (THIS_COM "${PROJECT_SOURCE_DIR}/" )
@@ -46,7 +46,7 @@ else(MINI_CHEETAH_BUILD)
     include_directories("/usr/local/include/")   # lcm includes
   endif()
 
-  set(CMAKE_C_FLAGS "-O3  -ggdb  -march=native -std=gnu99 -I.")
+  set(CMAKE_C_FLAGS "-O3 -ggdb  -march=native -std=gnu99 -I.")
   message("**** Mini-Cheetah build disabled ****")
 endif(MINI_CHEETAH_BUILD)
 

@@ -54,6 +54,7 @@ private:
     VecM<T, xsize_WB> _xdot;
 
 protected:
+    // resolve the problem of hidden overloaded functions
     using RobotBase<T>::dynamics;
     using RobotBase<T>::dynamics_par;
     using RobotBase<T>::resetmap;
@@ -63,11 +64,9 @@ protected:
 public:
     void dynamics(VecM<T, xsize_WB> &x, VecM<T, usize_WB> &u, VecM<T, xsize_WB> &x_next, VecM<T, ysize_WB> &y, int mode) override;
     void resetmap(VecM<T, xsize_WB> &x, VecM<T, xsize_WB> &x_next, VecM<T, ysize_WB> &y, int mode) override;
-    // void resetmap(DVec<T> &x, DVec<T> &x_next, DVec<T> &y, int mode = 1);
     void dynamics_par(VecM<T, xsize_WB> &x, VecM<T, usize_WB> &u, MatMN<T, xsize_WB, xsize_WB> &A, MatMN<T, xsize_WB, usize_WB> &B,
                       MatMN<T, ysize_WB, xsize_WB> &C, MatMN<T, ysize_WB, usize_WB> &D, int mode) override;
     void resetmap_par(VecM<T, xsize_WB> &x, MatMN<T, xsize_WB, xsize_WB> &Px, int mode) override;
-    // void resetmap_par(DVec<T> &x, DMat<T> &Px, int mode = 1);
     void plan_foothold(DVec<T> &x, T stance_time, int mode) override {}
     void FootJacobian(VecM<T, xsize_WB> &x, MatMN<T,2,qsize_WB> &J, MatMN<T,2,qsize_WB> &Jd, int foot);
     void linkJacobian(VecM<T, xsize_WB> &x, MatMN<T,2,qsize_WB> &J, MatMN<T,2,qsize_WB> &Jd, size_t linkidx, VecM<T,2> contactLoc){}
