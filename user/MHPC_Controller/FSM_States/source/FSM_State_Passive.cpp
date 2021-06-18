@@ -74,6 +74,7 @@ FSM_StateName FSM_State_Passive<T>::checkTransition() {
 template <typename T>
 void FSM_State_Passive<T>::onExit() {
   // Nothing to clean up when exiting
+  iter = 0;
 }
 
 // template class FSM_State_Passive<double>;

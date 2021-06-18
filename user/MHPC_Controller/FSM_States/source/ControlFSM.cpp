@@ -126,9 +126,6 @@ void ControlFSM<T>::runFSM() {
         // Get the next FSM State by name
         nextState = getNextState(nextStateName);
 
-        // Print transition initialized info
-        //printInfo(1);
-
       } else {
         // Run the iteration for the current state normally
         currentState->run();
@@ -146,7 +143,7 @@ void ControlFSM<T>::runFSM() {
         currentState->onExit();
 
         // Print finalizing transition info
-        //printInfo(2);
+        printInfo(2);
 
         // Complete the transition
         currentState = nextState;

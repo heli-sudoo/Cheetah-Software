@@ -23,10 +23,10 @@ void MHPC_Controller::initializeController()
 void MHPC_Controller::runController()
 {
   // Find the desired state trajectory
-  // _desiredStateCommand->convertToStateCommands();
+  _desiredStateCommand->convertToStateCommands();
 
-  // // Run the Control FSM code
-  // _controlFSM->runFSM();
+  // Run the Control FSM code
+  _controlFSM->runFSM();
 }  
 
 

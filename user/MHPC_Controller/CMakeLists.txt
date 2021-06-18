@@ -6,13 +6,12 @@ project(MHPCCTRL)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# disable some warninigs that have been verified having no problems
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}\
 					 -Wno-unused -Wno-error=unused\
 					 -Wno-return-type -Wno-error=return-type\
 					 -Wno-sign-compare -Wno-error=sign-compare\
 					 -Wno-switch -Wno-error=switch\
-					 -Wno-reorder -Wno-error=reorder")
+					 -Wno-reorder -Wno-error=reorder")					 
 					 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}\
 					 -Wno-unused -Wno-error=unused\

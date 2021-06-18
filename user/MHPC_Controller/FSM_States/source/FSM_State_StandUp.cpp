@@ -92,6 +92,7 @@ FSM_StateName FSM_State_StandUp<T>::checkTransition() {
  */
 template <typename T>
 void FSM_State_StandUp<T>::onExit() {
+  iter = 0;
   // Nothing to clean up when exiting
 }
 
