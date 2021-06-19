@@ -241,6 +241,9 @@ FSM_State<T>* ControlFSM<T>::getNextState(FSM_StateName stateName) {
     case FSM_StateName::LOCOMOTION:
       return statesList.locomotion;
 
+    case FSM_StateName::PREBOUNDING:
+      return statesList.prebounding;
+
     default:
       return statesList.invalid;
   }
