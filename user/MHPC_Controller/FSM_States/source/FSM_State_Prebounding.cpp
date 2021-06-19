@@ -56,7 +56,9 @@ FSM_StateName FSM_State_Prebounding<T>::checkTransition()
     case K_PASSIVE:  // normal c
       this->nextStateName = FSM_StateName::PASSIVE;
       break;
-
+    case K_LOCOMOTION:
+      this->nextStateName = FSM_StateName::LOCOMOTION;
+      break;
     default:
       std::cout << "[CONTROL FSM] Bad Request: Cannot transition from "
                 << K_PREBOUNDING << " to "
