@@ -26,5 +26,6 @@ documentation/doxygen/latex
 documentation/doxygen/html
 documentation/doxygen/html
 documentation/doxygen/latex
+user/MHPC_Controller/PreComputeData
 .DS_Store
 tags
