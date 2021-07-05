@@ -19,15 +19,17 @@
  * @param _gaitScheduler controls scheduled foot contact modes
  * @param _desiredStateCommand gets the desired COM state trajectories
  * @param controlParameters passes in the control parameters from the GUI
+ * 
+ * @param T lower-precision (float) type alias for original cheetah software classes e.g., 
  */
 template <typename T>
 ControlFSM<T>::ControlFSM(Quadruped<T>* _quadruped,
                           StateEstimatorContainer<T>* _stateEstimator,
                           LegController<T>* _legController,
-                          Gait<T> *_gait,
                           DesiredStateCommand<T>* _desiredStateCommand,
-                          USRCMD<T> *_usrcmd,
+                          USRCMD<double> *_usrcmd,
                           ContactEstimator<T> *_contactEstimator,
+                          Gait *_gait,
                           RobotControlParameters* controlParameters,
                           MHPCUserParameters* userParameters,
                           VisualizationData* visualizationData)
@@ -48,7 +50,7 @@ ControlFSM<T>::ControlFSM(Quadruped<T>* _quadruped,
   statesList.invalid = nullptr;
   statesList.passive = new FSM_State_Passive<T>(&data);
   statesList.standUp = new FSM_State_StandUp<T>(&data);
-  statesList.locomotion = new FSM_State_Locomotion<T>(&data);
+  statesList.locomotion = new FSM_State_Locomotion<T, double>(&data);
   statesList.prebounding = new FSM_State_Prebounding<T>(&data);
   safetyChecker = new SafetyChecker<T>(&data);
 
@@ -311,6 +313,5 @@ void ControlFSM<T>::printInfo(int opt) {
   }
 }
 
-// template class ControlFSM<double>; This should be fixed... need to make
 // RobotRunner a template
-template class ControlFSM<casadi_real>;
+template class ControlFSM<float>;

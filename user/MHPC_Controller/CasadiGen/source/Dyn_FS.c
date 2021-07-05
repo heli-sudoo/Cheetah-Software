@@ -16,7 +16,7 @@ extern "C" {
 #include <math.h>
 
 #ifndef casadi_real
-#define casadi_real float
+#define casadi_real double
 #endif
 
 #ifndef casadi_int

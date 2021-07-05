@@ -6,85 +6,85 @@
 #include "PlanarRobot.h"
 #include <vector>
 
-template <typename T>
+template <typename TH>
 class CostAbstract
 {
 public:
     virtual ~ CostAbstract() = default;
 
-    virtual void running_cost(ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                              ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                              RCostStruct<T, xsize_WB, usize_WB, ysize_WB> &, int) {}
+    virtual void running_cost(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                              ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                              RCostStruct<TH, xsize_WB, usize_WB, ysize_WB> &, int) {}
 
-    virtual void running_cost(ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                              ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                              RCostStruct<T, xsize_FB, usize_FB, ysize_FB> &, int) {}
+    virtual void running_cost(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                              ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                              RCostStruct<TH, xsize_FB, usize_FB, ysize_FB> &, int) {}
 
-    virtual void running_cost_par(ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                                  ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                                  RCostStruct<T, xsize_WB, usize_WB, ysize_WB> &, int) {}
+    virtual void running_cost_par(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                                  ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                                  RCostStruct<TH, xsize_WB, usize_WB, ysize_WB> &, int) {}
 
-    virtual void running_cost_par(ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                                  ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                                  RCostStruct<T, xsize_FB, usize_FB, ysize_FB> &, int) {}
+    virtual void running_cost_par(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                                  ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                                  RCostStruct<TH, xsize_FB, usize_FB, ysize_FB> &, int) {}
 
-    virtual void terminal_cost(ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                               ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                               TCostStruct<T, xsize_WB> &, int) {}
+    virtual void terminal_cost(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                               ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                               TCostStruct<TH, xsize_WB> &, int) {}
 
-    virtual void terminal_cost(ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                               ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                               TCostStruct<T, xsize_FB> &, int) {}
+    virtual void terminal_cost(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                               ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                               TCostStruct<TH, xsize_FB> &, int) {}
 
-    virtual void terminal_cost_par(ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                                   ModelState<T, xsize_WB, usize_WB, ysize_WB> &,
-                                   TCostStruct<T, xsize_WB> &, int) {}
+    virtual void terminal_cost_par(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                                   ModelState<TH, xsize_WB, usize_WB, ysize_WB> &,
+                                   TCostStruct<TH, xsize_WB> &, int) {}
 
-    virtual void terminal_cost_par(ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                                   ModelState<T, xsize_FB, usize_FB, ysize_FB> &,
-                                   TCostStruct<T, xsize_FB> &, int) {}
+    virtual void terminal_cost_par(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                                   ModelState<TH, xsize_FB, usize_FB, ysize_FB> &,
+                                   TCostStruct<TH, xsize_FB> &, int) {}
 };
 
-template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
-class Cost : public CostAbstract<T>
+template <typename TH, size_t XSIZE, size_t USIZE, size_t YSIZE>
+class Cost : public CostAbstract<TH>
 {
 public:
-    T _dt;
-    MatMN<T, XSIZE, XSIZE> *_Q = nullptr, *_Qf = nullptr;
-    MatMN<T, USIZE, USIZE> *_R = nullptr;
-    MatMN<T, YSIZE, YSIZE> *_S = nullptr;
+    TH _dt;
+    MatMN<TH, XSIZE, XSIZE> *_Q = nullptr, *_Qf = nullptr;
+    MatMN<TH, USIZE, USIZE> *_R = nullptr;
+    MatMN<TH, YSIZE, YSIZE> *_S = nullptr;
     int _n_modes;
     static constexpr size_t _xsize = XSIZE, _usize = USIZE, _ysize = YSIZE;
 
 public:
-    Cost(T dt=0.001, int n_modes=4):_dt(dt), _n_modes(n_modes) {}
+    Cost(TH dt=0.001, int n_modes=4):_dt(dt), _n_modes(n_modes) {}
 
     virtual void set_weighting_matrices(){}
 
 protected:
-    using CostAbstract<T>::running_cost; // resolve problem of hidden overloaded functions
-    using CostAbstract<T>::running_cost_par;
-    using CostAbstract<T>::terminal_cost;
-    using CostAbstract<T>::terminal_cost_par;
+    using CostAbstract<TH>::running_cost; // resolve problem of hidden overloaded functions
+    using CostAbstract<TH>::running_cost_par;
+    using CostAbstract<TH>::terminal_cost;
+    using CostAbstract<TH>::terminal_cost_par;
 
 public:
     virtual ~Cost() = default;
     
-    void running_cost(ModelState<T, XSIZE, USIZE, YSIZE> &,
-                      ModelState<T, XSIZE, USIZE, YSIZE> &,
-                      RCostStruct<T, XSIZE, USIZE, YSIZE> &, int) override;
+    void running_cost(ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                      ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                      RCostStruct<TH, XSIZE, USIZE, YSIZE> &, int) override;
 
-    void running_cost_par(ModelState<T, XSIZE, USIZE, YSIZE> &,
-                          ModelState<T, XSIZE, USIZE, YSIZE> &,
-                          RCostStruct<T, XSIZE, USIZE, YSIZE> &, int) override;
+    void running_cost_par(ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                          ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                          RCostStruct<TH, XSIZE, USIZE, YSIZE> &, int) override;
 
-    void terminal_cost(ModelState<T, XSIZE, USIZE, YSIZE> &,
-                       ModelState<T, XSIZE, USIZE, YSIZE> &,
-                       TCostStruct<T, XSIZE> &, int) override;
+    void terminal_cost(ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                       ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                       TCostStruct<TH, XSIZE> &, int) override;
 
-    void terminal_cost_par(ModelState<T, XSIZE, USIZE, YSIZE> &,
-                           ModelState<T, XSIZE, USIZE, YSIZE> &,
-                           TCostStruct<T, XSIZE> &, int) override;
+    void terminal_cost_par(ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                           ModelState<TH, XSIZE, USIZE, YSIZE> &,
+                           TCostStruct<TH, XSIZE> &, int) override;
 
 };
 

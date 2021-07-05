@@ -31,7 +31,7 @@ struct FSM_StatesList {
   FSM_State_Passive<T>* passive;
   FSM_State_StandUp<T>* standUp;
   FSM_State_Prebounding<T>* prebounding; 
-  FSM_State_Locomotion<T>* locomotion;
+  FSM_State_Locomotion<T, double>* locomotion;
 };
 
 
@@ -52,10 +52,10 @@ class ControlFSM {
   ControlFSM(Quadruped<T>* _quadruped,
              StateEstimatorContainer<T>* _stateEstimator,
              LegController<T>* _legController,
-             Gait<T> *_gait,
              DesiredStateCommand<T>* _desiredStateCommand,
-             USRCMD<T> *_usrcmd,
+             USRCMD<double> *_usrcmd,
              ContactEstimator<T> *_contactEstimator,
+             Gait *_gait,
              RobotControlParameters* controlParameters,
              MHPCUserParameters* userParameters,
              VisualizationData* visualizationData);

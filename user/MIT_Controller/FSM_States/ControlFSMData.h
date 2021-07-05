@@ -25,7 +25,6 @@ struct ControlFSMData {
   VisualizationData* visualizationData;
 };
 
-template struct ControlFSMData<double>;
 template struct ControlFSMData<float>;
 
 #endif  // CONTROLFSM_H

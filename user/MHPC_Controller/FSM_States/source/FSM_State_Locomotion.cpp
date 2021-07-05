@@ -1,8 +1,8 @@
 #include "FSM_State_Locomotion.h"
 #include "MHPC_CompoundTypes.h"
 #include "MHPCUtils.h"
-template <typename T>
-FSM_State_Locomotion<T>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData)
+template<typename T, typename T2>
+FSM_State_Locomotion<T, T2>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData)
     : FSM_State<T>(_controlFSMData, FSM_StateName::LOCOMOTION, "LOCOMOTION")
 {
 	K_DDP_buf = new MatMN<T,4,14> [4000]; // allocate sufficient memory to store pre-computed feedback gain
@@ -13,24 +13,26 @@ FSM_State_Locomotion<T>::FSM_State_Locomotion(ControlFSMData<T>* _controlFSMData
 	read_pos_des_data();
 	read_vel_des_data();
 	read_fb_gain_data();
-	offline_steps = tau_ff_buf.size();
+	offline_steps = tau_des_buf.size();
 
-  HSDDP_OPTION<T> option;
+  HSDDP_OPTION<T2> option;
+  option.max_AL_iter = 2;
+  option.max_DDP_iter = 3;
   userParams = _controlFSMData->userParameters;
-  mhpc = new MHPCLocomotion<T>(_controlFSMData->userParameters, option);
+  mhpc = new MHPCLocomotion<T, T2>(_controlFSMData->userParameters, option);
   mhpc->initialization(_controlFSMData);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::onEnter()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::onEnter()
 {
   // Default is to not transition
   this->nextStateName = this->stateName;
 	iter = 0;
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::run()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::run()
 {
   // get state estimate in 2D case
   state2D = Convert3DEstimateTo2D(this->_data->_stateEstimator->getResultHandle(),
@@ -40,10 +42,12 @@ void FSM_State_Locomotion<T>::run()
   if (iter < offline_steps)
   {
     pos_des = pos_des_buf[iter];
-    vel_des = pos_des_buf[iter];
-    qdes = qdes_buf[iter];
-    qddes = qddes_buf[iter];
+    vel_des = vel_des_buf[iter];
+    qdes = -qdes_buf[iter];
+    qddes = -qddes_buf[iter];
+    udes = -tau_des_buf[iter];
     Kddp = K_DDP_buf[iter];
+    pos_des[0] += 0.0927;
     offline_controller();
   }
   else // execute online MPC (entering normal bounding)
@@ -51,8 +55,8 @@ void FSM_State_Locomotion<T>::run()
 	iter++;
 }
 
-template <typename T>
-FSM_StateName FSM_State_Locomotion<T>::checkTransition()
+template<typename T, typename T2>
+FSM_StateName FSM_State_Locomotion<T, T2>::checkTransition()
 {
 	this->nextStateName = this->stateName;
 
@@ -74,14 +78,14 @@ FSM_StateName FSM_State_Locomotion<T>::checkTransition()
   return this->nextStateName;
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::onExit()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::onExit()
 {
 		iter = 0;
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::offline_controller()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::offline_controller()
 {   
     Vec4<T> q  = state2D.segment(3,4);
     Vec4<T> qd = state2D.tail(4); 
@@ -90,13 +94,14 @@ void FSM_State_Locomotion<T>::offline_controller()
     MatMN<T,4,4> Kp_joint_ddp = Kddp.block(0,3,4,4);
     MatMN<T,4,4> Kd_joint_ddp = Kddp.block(0,10,4,4);
 
+    // userParameter has type double. Needs to be casted to T
     Vec3<double> Kp_temp = this->_data->userParameters->kp_joint; 
     Vec3<double> Kd_temp = this->_data->userParameters->kd_joint; 
     Mat3<T> Kp_pd = Kp_temp.cast<T>().asDiagonal();
     Mat3<T> Kd_pd = Kd_temp.cast<T>().asDiagonal();
     
     /* feedback from body state */
-    T sp = 0.2, sd = 1; // scale the body state feeback if necessary
+    T sp = -0.2, sd = -0.1; // scale the body state feeback if necessary
     udes += sp*Kp_body_ddp*(state2D.head(3)-pos_des)+ 
             sd*Kd_body_ddp*(state2D.segment(7,3)-vel_des);
     /* feedback from leg state*/
@@ -119,48 +124,48 @@ void FSM_State_Locomotion<T>::offline_controller()
     }
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_tau_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_tau_data()
 {
   std::string FILENAME = "torque_HSDDP.txt";
-  read_data4(OFFLINE_DATA_DIR+FILENAME, tau_ff_buf);
+  read_data4(OFFLINE_DATA_DIR+FILENAME, tau_des_buf);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_qdes_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_qdes_data()
 {
   std::string FILENAME = "qdes_HSDDP.txt";
   read_data4(OFFLINE_DATA_DIR+FILENAME, qdes_buf);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_qddes_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_qddes_data()
 {
   std::string FILENAME = "qddes_HSDDP.txt";
   read_data4(OFFLINE_DATA_DIR+FILENAME, qddes_buf);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_pos_des_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_pos_des_data()
 {
   std::string FILENAME = "pos_des_HSDDP.txt";
   read_data3(OFFLINE_DATA_DIR+FILENAME, pos_des_buf);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_vel_des_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_vel_des_data()
 {
   std::string FILENAME = "vel_des_HSDDP.txt";
   read_data3(OFFLINE_DATA_DIR+FILENAME, vel_des_buf);
 }
 
-template <typename T>
-void FSM_State_Locomotion<T>::read_fb_gain_data()
+template<typename T, typename T2>
+void FSM_State_Locomotion<T, T2>::read_fb_gain_data()
 {
   std::string FILENAME = "K_HSDDP.txt";
   read_fb_mat_data(OFFLINE_DATA_DIR+FILENAME, K_DDP_buf);
 }
 
 // template class FSM_State_Locomotion<double>;
-template class FSM_State_Locomotion<casadi_real>;
+template class FSM_State_Locomotion<float, double>;
 

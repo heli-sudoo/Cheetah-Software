@@ -9,6 +9,6 @@ home_rpy            : [0,-0.12,0]
 n_wbphase:    2
 n_fbphase:    6
 dt_wb:        0.001
-dt_fb:        0.002
+dt_fb:        0.001
 cmode:        1
 groundH:      -0.404

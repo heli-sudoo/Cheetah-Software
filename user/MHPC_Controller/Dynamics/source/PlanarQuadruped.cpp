@@ -139,28 +139,28 @@ void PlanarQuadruped<T>::build_quadruped()
 
 
 template<typename T>
-MatMN<T,4,4> PlanarQuadruped<T>::get_homoTransformation(VecM<T, qsize_WB> q, size_t linkidx)
+MatMN<T,4,4> PlanarQuadruped<T>::get_homoTransformation(VecM<T, qsize_WB> &q, size_t linkidx)
 {
     MatMN<T,4,4> T_body;
-    T_body = ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, q[2]), VecM<T,3>(q[0], 0, q[1]));
+    T_body = ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, -q[2]), VecM<T,3>(q[0], 0, q[1]));
     if(linkidx == linkID2D::body) {return T_body;}
 
     MatMN<T,4,4> T_Fhip, T_Hhip;
     T_Fhip = T_body *
-             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, q[3]), VecM<T,3>(hipLoc[0], 0, hipLoc[1]));
+             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, -q[3]), VecM<T,3>(hipLoc[0], 0, hipLoc[1]));
     if(linkidx == linkID2D::F_hip) {return T_Fhip;}
 
     T_Hhip = T_body *
-             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, q[5]), VecM<T,3>(-hipLoc[0], 0, hipLoc[1]));
+             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, -q[5]), VecM<T,3>(-hipLoc[0], 0, hipLoc[1]));
     if(linkidx == linkID2D::H_hip) {return T_Hhip;}                     
 
     MatMN<T,4,4> T_Fknee, T_Hknee;
     T_Fknee = T_Fhip *
-             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, q[4]), VecM<T,3>(kneeLoc[0], 0, kneeLoc[1]));
+             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, -q[4]), VecM<T,3>(kneeLoc[0], 0, kneeLoc[1]));
     if(linkidx == linkID2D::F_knee) {return T_Fknee;}                     
 
     T_Hknee = T_Hhip *
-             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, q[6]), VecM<T,3>(kneeLoc[0], 0, kneeLoc[1]));
+             ori::homoTransformation(ori::coordinateRotation(ori::CoordinateAxis::Y, -q[6]), VecM<T,3>(kneeLoc[0], 0, kneeLoc[1]));
     if(linkidx == linkID2D::H_knee) {return T_Hknee;}   
 
     MatMN<T,4,4> T_Ffoot, T_Hfoot;
@@ -175,11 +175,12 @@ MatMN<T,4,4> PlanarQuadruped<T>::get_homoTransformation(VecM<T, qsize_WB> q, siz
 }
 
 template<typename T>
-VecM<T,2> PlanarQuadruped<T>::get_contact_position(VecM<T,qsize_WB> q, size_t linkidx, VecM<T,2> contactLoc)
+VecM<T,2> PlanarQuadruped<T>::get_contact_position(VecM<T,qsize_WB> &q, size_t linkidx, VecM<T,2> &contactLoc)
 {
     VecM<T,4> p_world;
     VecM<T,2> p_world_2D;
-    p_world = get_homoTransformation(q, linkidx) * VecM<T,4>(contactLoc[0], 0, contactLoc[1], 1);
+    MatMN<T,4,4> H = get_homoTransformation(q, linkidx);
+    p_world = H * VecM<T,4>(contactLoc[0], 0, contactLoc[1], 1);
     p_world_2D << p_world[0], p_world[2];
     return p_world_2D;
 }
@@ -191,17 +192,18 @@ VecM<T,2> PlanarQuadruped<T>::get_contact_position(VecM<T,qsize_WB> q, size_t li
           legidx: 0->front leg, 1->rear leg
 */
 template<typename T>
-VecM<T,2> PlanarQuadruped<T>::get_leg_ext_vec(VecM<T,qsize_WB> q, int legidx)
+VecM<T,2> PlanarQuadruped<T>::get_leg_ext_vec(VecM<T,qsize_WB> &q, int legidx)
 {
+    VecM<T, 2> loc;
+    loc.setZero();
     if(legID::FLEG == legidx)
-    return (get_contact_position(q, linkID2D::F_foot, VecM<T,2>::Zero()) - get_contact_position(q, linkID2D::F_hip, VecM<T,2>::Zero()));
+    return (get_contact_position(q, linkID2D::F_foot, loc) - get_contact_position(q, linkID2D::F_hip, loc));
 
     if(legID::HLEG == legidx)
-    return (get_contact_position(q, linkID2D::H_foot, VecM<T,2>::Zero()) - get_contact_position(q, linkID2D::H_hip, VecM<T,2>::Zero()));
+    return (get_contact_position(q, linkID2D::H_foot, loc) - get_contact_position(q, linkID2D::H_hip, loc));
 
 }
 
-// template class PlanarQuadruped<float>;
-template class PlanarQuadruped<casadi_real>; 
+template class PlanarQuadruped<double>; 
 
 

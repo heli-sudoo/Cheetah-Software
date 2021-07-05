@@ -106,19 +106,20 @@ void read_fb_mat_data(std::string FILENAME, MatMN<T,4,14>* K)
   }
 }
 
-// Instantiation with casadi_real type
-template Vec14<casadi_real> Convert3DEstimateTo2D<casadi_real>(const StateEstimate<casadi_real> *stateEstimate, 
-                                                   const LegControllerData<casadi_real> *legdata);
-template void read_data4<casadi_real> (std::string FILENAME, std::vector<Vec4<casadi_real>>&V);
-template void read_data3<casadi_real>(std::string FILENAME, std::vector<Vec3<casadi_real>>&V);
-template void read_fb_mat_data<casadi_real>(std::string FILENAME, MatMN<casadi_real,4,14>* K);
-template void Convert2DStateTo3D<casadi_real>(FBModelState<casadi_real> &state, Vec14<casadi_real> & x2D);
+// Explicit instantiation with double
+template Vec14<double> Convert3DEstimateTo2D<double>(const StateEstimate<double> *stateEstimate, 
+                                                   const LegControllerData<double> *legdata);
+template void read_data4<double> (std::string FILENAME, std::vector<Vec4<double>>&V);
+template void read_data3<double>(std::string FILENAME, std::vector<Vec3<double>>&V);
+template void read_fb_mat_data<double>(std::string FILENAME, MatMN<double,4,14>* K);
+template void Convert2DStateTo3D<double>(FBModelState<double> &state, Vec14<double> & x2D);
 
-// // Instantiation with double type
-// template Vec14<double> Convert3DEstimateTo2D<double>(const StateEstimate<double> *stateEstimate, const LegControllerData<double> *legdata);
-// template void read_data4<double> (std::string&FILENAME, std::vector<Vec4<double>>&V);
-// template void read_data3<double>(std::string&FILENAME, std::vector<Vec3<double>>&V);
-// template void read_fb_mat_data<double>(std::string&FILENAME, MatMN<double,4,14>* K);
-// template void Convert2DStateTo3D<double>(FBModelState<double> &state, Vec14<double> & x2D);
+// Explicit instantiation with float
+template Vec14<float> Convert3DEstimateTo2D<float>(const StateEstimate<float> *stateEstimate, 
+                                                   const LegControllerData<float> *legdata);
+template void read_data4<float> (std::string FILENAME, std::vector<Vec4<float>>&V);
+template void read_data3<float>(std::string FILENAME, std::vector<Vec3<float>>&V);
+template void read_fb_mat_data<float>(std::string FILENAME, MatMN<float,4,14>* K);
+template void Convert2DStateTo3D<float>(FBModelState<float> &state, Vec14<float> & x2D);
 
 

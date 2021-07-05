@@ -222,4 +222,4 @@ bool SafetyChecker<T>::checkForceFeedForward() {
 
 // template class SafetyChecker<double>; //This should be fixed... need to make
 // RobotRunner a template
-template class SafetyChecker<casadi_real>;
+template class SafetyChecker<float>;

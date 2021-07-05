@@ -26,9 +26,14 @@ template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
 void SinglePhase<T, XSIZE, USIZE, YSIZE>::initialization()
 {
     _num_pconstr = this->_constraint->get_num_pconstraint(this->_modeidx);
-    _num_tconstr = this->_constraint->get_num_tconstraint(this->_modeidx);      
-    _pconstr.reserve(_num_pconstr);
-    _tconstr.reserve(_num_tconstr);
+    _num_tconstr = this->_constraint->get_num_tconstraint(this->_modeidx);   
+    
+    if (_pconstr == nullptr)
+        delete [] _pconstr;
+    if (_tconstr == nullptr)
+        delete [] _tconstr;
+    _pconstr = new IneqConstrStruct<T, XSIZE, USIZE, YSIZE>[_num_pconstr];
+    _tconstr = new TConstrStruct<T, XSIZE>[_num_tconstr];
     B.setZero(_num_pconstr);
     Bz.setZero(_num_pconstr);
     Bzz.setZero(_num_pconstr);
@@ -213,9 +218,12 @@ bool SinglePhase<T, XSIZE, USIZE, YSIZE>::backward_sweep(T regularization)
 template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
 void SinglePhase<T, XSIZE, USIZE, YSIZE>::update_running_cost_with_pconstr(
     RCostStruct<T, XSIZE, USIZE, YSIZE> &Rcost,
-    vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>>& Ineq,
+    IneqConstrStruct<T, XSIZE, USIZE, YSIZE>* Ineq,
     DVec<T> &delta, DVec<T> &eps, int calcflag)
 {
+    if (Ineq == nullptr)
+        return;
+
     B.setZero();
     Bz.setZero();
     Bzz.setZero();
@@ -247,8 +255,11 @@ void SinglePhase<T, XSIZE, USIZE, YSIZE>::update_running_cost_with_smooth()
 
 template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
 void SinglePhase<T, XSIZE, USIZE, YSIZE>::update_terminal_cost_with_tconstr(
-    TCostStruct<T, XSIZE> &Tcost, vector<TConstrStruct<T, XSIZE>>& Tconstr, T sigma, DVec<T> &lambda, int calcflag)
+    TCostStruct<T, XSIZE> &Tcost, TConstrStruct<T, XSIZE>* Tconstr, T sigma, DVec<T> &lambda, int calcflag)
 {
+    if (Tconstr == nullptr)
+        return;
+
     for (size_t idx = 0; idx < _num_tconstr; idx++)
     {
         if (calcflag == CALC_DYNAMICS_ONLY || calcflag == CALC_DYN_AND_PAR)
@@ -258,7 +269,7 @@ void SinglePhase<T, XSIZE, USIZE, YSIZE>::update_terminal_cost_with_tconstr(
         if (calcflag == CALC_DYNAMICS_ONLY || calcflag == CALC_DYN_AND_PAR)
         {
             Tcost.Phix += 50 * (sigma * sigma / 2 * Tconstr[idx].hx * Tconstr[idx].h + lambda[idx] * Tconstr[idx].hx);
-            Tcost.Phixx += 50 * (sigma * sigma / 2 * (Tconstr[idx].hx * Tconstr[idx].hx.transpose() + Tconstr[idx].h * Tconstr[idx].hxx) + lambda(idx) * Tconstr[idx].hxx);
+            Tcost.Phixx += 50 * (sigma * sigma / 2 * (Tconstr[idx].hx * Tconstr[idx].hx.transpose() + Tconstr[idx].h * Tconstr[idx].hxx) + lambda[idx] * Tconstr[idx].hxx);
         }
     }
 }
@@ -285,7 +296,7 @@ void SinglePhase<T, XSIZE, USIZE, YSIZE>::set_data_to_zero()
 
 template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
 void SinglePhase<T, XSIZE, USIZE, YSIZE>::reduced_barrier(
-    vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>> &Ineq, DVec<T> &delta, DVec<T> &b, DVec<T> &bz, DVec<T> &bzz)
+    IneqConstrStruct<T, XSIZE, USIZE, YSIZE> *Ineq, DVec<T> &delta, DVec<T> &b, DVec<T> &bz, DVec<T> &bzz)
 {
     int k = 2; // order of approximating polynomial
     for (size_t idx = 0; idx < b.size(); idx++)
@@ -367,5 +378,5 @@ SinglePhase<T, XSIZE, USIZE, YSIZE>::~SinglePhase()
 {
 }
 
-template class SinglePhase<casadi_real, 14, 4, 4>;
-template class SinglePhase<casadi_real, 6, 4, 4>;
+template class SinglePhase<double, 14, 4, 4>;
+template class SinglePhase<double, 6, 4, 4>;

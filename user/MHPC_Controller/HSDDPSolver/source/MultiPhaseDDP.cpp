@@ -190,7 +190,6 @@ void MultiPhaseDDP<T>::solve()
         duration = duration_ms(stop - start);
         time_partial = duration.count();
 #endif
-
         update_nominal_trajectory();
         int iter_DDP = 1;
         T regularization = 0;
@@ -431,4 +430,4 @@ void MultiPhaseDDP<T>::warmstart()
     }
 }
 
-template class MultiPhaseDDP<casadi_real>;
+template class MultiPhaseDDP<double>;

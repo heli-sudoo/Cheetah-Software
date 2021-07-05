@@ -11,23 +11,27 @@ void bounding_PDcontrol(PlanarQuadruped<T>* robot, ModelState<T,xsize_WB,usize_W
     T Kspring = 2200;
     VecM<T,2> F;
     MatMN<T,2,7> J, Jd;
-    F.setZero();
-    J.setZero();
-    Jd.setZero();
+    VecM<T, 7> q;
+    q.setZero();
 
     for (size_t k = 0; k < N_TIME_STEPS-1; k++)
     {
+        F.setZero();
+        J.setZero();
+        Jd.setZero();
+        q = ms[k].x.head(7);
+
         switch (modeidx)
         {
         case 1:
             robot->FootJacobian(ms[k].x, J, Jd, legID::HLEG);
-            leg_ext_vec = robot->get_leg_ext_vec(ms[k].x.head(7), legID::HLEG);
+            leg_ext_vec = robot->get_leg_ext_vec(q, legID::HLEG);
             F = -leg_ext_vec.normalized()*Kspring*(leg_ext_vec.norm() - legext_nom);
             ms[k].u = J.bottomRightCorner(2,4).transpose()*F*3;
             break;
         case 3:
             robot->FootJacobian(ms[k].x, J, Jd, legID::FLEG);
-            leg_ext_vec = robot->get_leg_ext_vec(ms[k].x.head(7), legID::FLEG);
+            leg_ext_vec = robot->get_leg_ext_vec(q, legID::FLEG);
             F = -leg_ext_vec.normalized()*Kspring*(leg_ext_vec.norm() - legext_nom);
             ms[k].u = J.bottomRightCorner(2,4).transpose()*F*2.2;
             break;
@@ -41,5 +45,5 @@ void bounding_PDcontrol(PlanarQuadruped<T>* robot, ModelState<T,xsize_WB,usize_W
     }    
 }
 
-template void bounding_PDcontrol(PlanarQuadruped<casadi_real>* robot, ModelState<casadi_real,xsize_WB,usize_WB,ysize_WB> *ms, int modeidx, size_t N_TIME_STEPS);
+template void bounding_PDcontrol(PlanarQuadruped<double>* robot, ModelState<double,xsize_WB,usize_WB,ysize_WB> *ms, int modeidx, size_t N_TIME_STEPS);
 

@@ -70,4 +70,4 @@ void SinglePhaseAbstract<T>::set_CTG_from_nextPhase(T &dVnext, DVec<T> &Gnext, D
     _Hnext = Hnext;
 }
 
-template class SinglePhaseAbstract<casadi_real>;
+template class SinglePhaseAbstract<double>;

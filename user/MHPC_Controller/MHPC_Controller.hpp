@@ -28,13 +28,13 @@ class MHPC_Controller:public RobotController{
     }
 
   public:
-    USRCMD<casadi_real> usrcmd; // user command
+    USRCMD<double> usrcmd; // user command
 
   protected:
     MHPCUserParameters userParameters;
-    Gait<casadi_real> *_gait = nullptr;
-    ContactEstimator<casadi_real> *_contactEstimator; // contact estimator by He Li
-    ControlFSM<casadi_real> *_controlFSM;
+    Gait *_gait = nullptr;
+    ContactEstimator<float> *_contactEstimator; // contact estimator by He Li
+    ControlFSM<float> *_controlFSM;
 
 };
 

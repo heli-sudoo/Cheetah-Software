@@ -78,7 +78,7 @@ void FSM_State_Prebounding<T>::onExit()
 
 // explicit instantiation 
 // template class FSM_State_Prebounding<double>;
-template class FSM_State_Prebounding<casadi_real>;
+template class FSM_State_Prebounding<float>;
 
 
 

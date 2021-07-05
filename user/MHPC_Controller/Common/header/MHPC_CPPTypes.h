@@ -6,10 +6,8 @@
 #define CALC_DYN_AND_PAR 0
 #define CALC_PARTIALS_ONLY 1
 #define CALC_DYNAMICS_ONLY 2
-#define N_TIMESTEPS_MAX 100
+#define N_TIMESTEPS_MAX 110
 
-
-#define casadi_real float
 
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -19,7 +17,7 @@
 
 #define PI 3.141592653589793238
 
-// #define DEBUG 1
+#define DEBUG 1
 
 //  #define TIME_BENCHMARK
 

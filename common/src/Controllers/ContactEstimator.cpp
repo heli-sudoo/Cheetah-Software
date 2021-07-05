@@ -16,6 +16,8 @@ ContactEstimator<T>::ContactEstimator(FloatingBaseModel<T>* model,
   this->_stateEstimator = stateEstimator;
   this->_stateEstimate = stateEstimate;
   this->_controlParameters = controlParameters;  
+  this->_state.q.setZero(12);
+  this->_state.qd.setZero(12);
   _loc_foot << 0,0,-_quadruped->_kneeLinkLength;
   init();
 }

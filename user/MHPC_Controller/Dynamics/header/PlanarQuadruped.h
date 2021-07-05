@@ -71,9 +71,9 @@ public:
     void FootJacobian(VecM<T, xsize_WB> &x, MatMN<T,2,qsize_WB> &J, MatMN<T,2,qsize_WB> &Jd, int foot);
     void linkJacobian(VecM<T, xsize_WB> &x, MatMN<T,2,qsize_WB> &J, MatMN<T,2,qsize_WB> &Jd, size_t linkidx, VecM<T,2> contactLoc){}
     void build_quadruped();
-    MatMN<T,4,4> get_homoTransformation(VecM<T, qsize_WB> q, size_t linkidx);
-    VecM<T,2> get_contact_position(VecM<T, qsize_WB> q, size_t linkidx, VecM<T,2> contactLoc);
-    VecM<T,2> get_leg_ext_vec(VecM<T, qsize_WB> q, int legidx);
+    MatMN<T,4,4> get_homoTransformation(VecM<T, qsize_WB> &q, size_t linkidx);
+    VecM<T,2> get_contact_position(VecM<T, qsize_WB> &q, size_t linkidx, VecM<T,2> &contactLoc);
+    VecM<T,2> get_leg_ext_vec(VecM<T, qsize_WB> &q, int legidx);
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

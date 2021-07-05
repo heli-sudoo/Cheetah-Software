@@ -10,12 +10,11 @@ enum class GaitType2D
     PRONK
 };
 
-template<typename T>
 class Gait
 {    
 private:
     DVec<int> _gait_mode;
-    DVec<T>  _gait_timing;
+    DVec<float>  _gait_timing;
     std::string _gait_name;
 
 public:
@@ -23,7 +22,7 @@ public:
     {
         _gait_mode = VecM<int, 4>(1,2,3,4);
         _gait_name = "BOUND";
-        _gait_timing = VecM<T,4>(0.08, 0.1, 0.08, 0.1);
+        _gait_timing = VecM<float,4>(0.08, 0.1, 0.08, 0.1);
     }
 
     Gait(GaitType2D gait)
@@ -33,13 +32,13 @@ public:
         case GaitType2D::BOUND:
             _gait_mode = VecM<int,4>(1,2,3,4);
             _gait_name = "BOUND";
-            _gait_timing = VecM<T,4>(0.08, 0.1, 0.08, 0.1);
+            _gait_timing = VecM<float,4>(0.08, 0.1, 0.08, 0.1);
             break;
         
         default:
             _gait_mode = VecM<int,4>(1,2,3,4);
             _gait_name = "BOUND";
-            _gait_timing = VecM<T,4>(0.08, 0.08, 0.08, 0.08);
+            _gait_timing = VecM<float,4>(0.08, 0.08, 0.08, 0.08);
             break;
         }
     }
@@ -66,9 +65,9 @@ public:
         return mode_seq;       
     }
 
-    DVec<T> get_timings(DVec<int> &mode_seq)
+    DVec<float> get_timings(DVec<int> &mode_seq)
     {
-        DVec<T> timings(mode_seq.size());
+        DVec<float> timings(mode_seq.size());
         for (size_t idx = 0; idx < mode_seq.size(); idx++)
         {
             timings[idx] = _gait_timing[mode_seq[idx]-1];
@@ -78,4 +77,4 @@ public:
     }
 };
 
-#endif // GAIT
+#endif // GAIT_H

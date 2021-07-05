@@ -1,4 +1,4 @@
-    #ifndef SINGLEPHASE_HSDDP
+#ifndef SINGLEPHASE_HSDDP
 #define SINGLEPHASE_HSDDP
 
 #include <string>
@@ -20,10 +20,10 @@ private:
     TCostStruct<T, XSIZE> *_tcost = nullptr;        
     ModelState<T, XSIZE, USIZE, YSIZE> *_ms_ref = nullptr; // reference trajectory
 
-    std::vector<TConstrStruct<T, XSIZE>> _tconstr;    
-    std::vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>> _pconstr; // pointer to a vector of inequality constraints
+    TConstrStruct<T, XSIZE>* _tconstr = nullptr;    
+    IneqConstrStruct<T, XSIZE, USIZE, YSIZE>* _pconstr = nullptr; 
     DVec<T> B, Bz, Bzz;
-    size_t _num_pconstr, _num_tconstr;
+    size_t _num_pconstr=0, _num_tconstr=0;
     AL_REB_PARAMETER<T> _param; // AL and ReB parameter for current phase
 
 protected: // resolve problem of hidden overloadded function
@@ -31,7 +31,8 @@ protected: // resolve problem of hidden overloadded function
     using SinglePhaseAbstract<T>::set_reference;
 
 public:
-    // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
     SinglePhase():SinglePhaseAbstract<T>(XSIZE, USIZE, YSIZE){}
     
     SinglePhase(RobotBase<T> *, CostAbstract<T> *, Constraint<T> *, HSDDP_OPTION<T>*, T, size_t, size_t, size_t);
@@ -79,7 +80,7 @@ public:
     T get_tconstr_violation() 
     {
         T sum(0);
-        for (size_t i = 0; i < _tconstr.size(); i++)
+        for (size_t i = 0; i < _num_tconstr; i++)
         {
             sum += _tconstr[i].get_violation_normsquare();
         }
@@ -88,17 +89,17 @@ public:
     }
 
 private:
-    void reduced_barrier(vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>> &Ineq, DVec<T> &delta, DVec<T> &B, DVec<T> &Bz, DVec<T> &Bzz); // z: vector of inequality constraint
+    void reduced_barrier(IneqConstrStruct<T, XSIZE, USIZE, YSIZE> *Ineq, DVec<T> &delta, DVec<T> &B, DVec<T> &Bz, DVec<T> &Bzz); // z: vector of inequality constraint
                                                                                             // B: vector of reduced barrier B
                                                                                             // Bz: first-order derivative
     void update_running_cost_with_pconstr(RCostStruct<T, XSIZE, USIZE, YSIZE> &Rcost, 
-                                          vector<IneqConstrStruct<T, XSIZE, USIZE, YSIZE>>& Ineq, 
+                                          IneqConstrStruct<T, XSIZE, USIZE, YSIZE>* Ineq, 
                                           DVec<T> &delta, DVec<T> &eps,  int calcflag);
 
     void update_running_cost_with_smooth();
 
     void update_terminal_cost_with_tconstr(TCostStruct<T,XSIZE> &Tcost, 
-                                           vector<TConstrStruct<T,XSIZE>>& Tconstr, 
+                                           TConstrStruct<T,XSIZE>* Tconstr, 
                                            T sigma, DVec<T> &lambda, int calcflag);
 };
 

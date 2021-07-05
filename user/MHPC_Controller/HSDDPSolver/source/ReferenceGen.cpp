@@ -66,4 +66,4 @@ void ReferenceGen<T>::Initialization(int n_WBphases, int n_FBphases,
 }
 
 
-template class ReferenceGen<casadi_real>;
+template class ReferenceGen<double>;

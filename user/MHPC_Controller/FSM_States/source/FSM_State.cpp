@@ -97,4 +97,4 @@ void FSM_State<T>::turnOffAllSafetyChecks() {
 
 
 // template class FSM_State<double>;
-template class FSM_State<casadi_real>;
+template class FSM_State<float>;

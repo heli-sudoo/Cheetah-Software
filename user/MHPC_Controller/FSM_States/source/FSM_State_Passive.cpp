@@ -78,4 +78,4 @@ void FSM_State_Passive<T>::onExit() {
 }
 
 // template class FSM_State_Passive<double>;
-template class FSM_State_Passive<casadi_real>;
+template class FSM_State_Passive<float>;

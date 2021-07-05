@@ -9,7 +9,8 @@ class PlanarFloatingBase:public RobotBase<T>
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-private:
+// private:
+public:
     VecM<T,4> _foothold;
     VecM<T,2> _contact_state;
     VecM<T,xsize_FB> _xdot;
@@ -47,7 +48,7 @@ public:
     void resetmap_par(VecM<T, xsize_FB> &x, MatMN<T,xsize_FB, xsize_FB> &Px, int mode) override;
     // void resetmap_par(DVec<T> &x, DMat<T> &Px, int mode = 1);
 
-    void plan_foothold(DVec<T> &x,T stance_time, int mode) override {_foothold= _foothold_planner->get_foothold_location(x.head(3), stance_time, mode);}
+    void plan_foothold(DVec<T> &x,T stance_time, int mode) override;
 
 };
 

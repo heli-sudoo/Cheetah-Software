@@ -48,6 +48,6 @@ target_link_libraries(mhpc_ctrl dynacore_param_handler)
 
 
 # cmake test for debugging
-add_subdirectory(test)
+# add_subdirectory(test)
 
 

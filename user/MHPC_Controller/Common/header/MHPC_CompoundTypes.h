@@ -202,8 +202,8 @@ struct HSDDP_OPTION
     T update_relax = 0.1;        // relaxation parameter udpate parameter
     T update_regularization = 2; // regularization parameter update parameter
     T update_ReB = 7;            // update barrier function weighting
-    T max_DDP_iter = 5;          // maximum inner loop iteration
-    T max_AL_iter = 3;           // maximum outer loop iteration
+    T max_DDP_iter = 3;          // maximum inner loop iteration
+    T max_AL_iter = 2;           // maximum outer loop iteration
     T DDP_thresh = 1e-03;        // inner loop convergence threshhold
     T AL_thresh = 1e-03;         // outer loop convergence threshhold
     bool AL_active = 1;               // activate terminal constraint

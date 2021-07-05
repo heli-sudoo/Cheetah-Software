@@ -1,9 +1,9 @@
 #include "CostBase.h"
 
-template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
-void Cost<T, XSIZE, USIZE, YSIZE>::running_cost(ModelState<T, XSIZE, USIZE, YSIZE> &mstate,
-                                                ModelState<T, XSIZE, USIZE, YSIZE> &mstate_ref,
-                                                RCostStruct<T, XSIZE, USIZE, YSIZE> &rcost, int mode)
+template <typename TH, size_t XSIZE, size_t USIZE, size_t YSIZE>
+void Cost<TH, XSIZE, USIZE, YSIZE>::running_cost(ModelState<TH, XSIZE, USIZE, YSIZE> &mstate,
+                                                ModelState<TH, XSIZE, USIZE, YSIZE> &mstate_ref,
+                                                RCostStruct<TH, XSIZE, USIZE, YSIZE> &rcost, int mode)
 {
     assert(("Actual state size and reference state size not equal", mstate.x.size() == mstate_ref.x.size()));
     assert(("Actual control size and reference control size not equal", mstate.u.size() == mstate_ref.u.size()));
@@ -15,10 +15,10 @@ void Cost<T, XSIZE, USIZE, YSIZE>::running_cost(ModelState<T, XSIZE, USIZE, YSIZ
     rcost.l *= _dt;
 }
 
-template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
-void Cost<T, XSIZE, USIZE, YSIZE>::running_cost_par(ModelState<T, XSIZE, USIZE, YSIZE> &mstate,
-                                                    ModelState<T, XSIZE, USIZE, YSIZE> &mstate_ref,
-                                                    RCostStruct<T, XSIZE, USIZE, YSIZE> &rcost, int mode)
+template <typename TH, size_t XSIZE, size_t USIZE, size_t YSIZE>
+void Cost<TH, XSIZE, USIZE, YSIZE>::running_cost_par(ModelState<TH, XSIZE, USIZE, YSIZE> &mstate,
+                                                    ModelState<TH, XSIZE, USIZE, YSIZE> &mstate_ref,
+                                                    RCostStruct<TH, XSIZE, USIZE, YSIZE> &rcost, int mode)
 {
     assert(("Actual state size and reference state size not equal", mstate.x.size() == mstate_ref.x.size()));
     assert(("Actual control size and reference control size not equal", mstate.u.size() == mstate_ref.u.size()));
@@ -33,10 +33,10 @@ void Cost<T, XSIZE, USIZE, YSIZE>::running_cost_par(ModelState<T, XSIZE, USIZE, 
     rcost.lyy = 2 * _dt * this->_S[mode - 1];    
 }
 
-template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
-void Cost<T, XSIZE, USIZE, YSIZE>::terminal_cost(ModelState<T, XSIZE, USIZE, YSIZE> & mstate,
-                                                 ModelState<T, XSIZE, USIZE, YSIZE> & mstate_ref,
-                                                 TCostStruct<T, XSIZE> & tcost, int mode)
+template <typename TH, size_t XSIZE, size_t USIZE, size_t YSIZE>
+void Cost<TH, XSIZE, USIZE, YSIZE>::terminal_cost(ModelState<TH, XSIZE, USIZE, YSIZE> & mstate,
+                                                 ModelState<TH, XSIZE, USIZE, YSIZE> & mstate_ref,
+                                                 TCostStruct<TH, XSIZE> & tcost, int mode)
 {
     assert(("Actual state size and reference state size not equal", mstate.x.size() == mstate_ref.x.size()));
     assert(("Actual control size and reference control size not equal", mstate.u.size() == mstate_ref.u.size()));
@@ -46,10 +46,10 @@ void Cost<T, XSIZE, USIZE, YSIZE>::terminal_cost(ModelState<T, XSIZE, USIZE, YSI
     tcost.Phi *= 0.5;
 }
 
-template <typename T, size_t XSIZE, size_t USIZE, size_t YSIZE>
-void Cost<T, XSIZE, USIZE, YSIZE>::terminal_cost_par(ModelState<T, XSIZE, USIZE, YSIZE> & mstate,
-                                                     ModelState<T, XSIZE, USIZE, YSIZE> & mstate_ref,
-                                                     TCostStruct<T, XSIZE> & tcost, int  mode)
+template <typename TH, size_t XSIZE, size_t USIZE, size_t YSIZE>
+void Cost<TH, XSIZE, USIZE, YSIZE>::terminal_cost_par(ModelState<TH, XSIZE, USIZE, YSIZE> & mstate,
+                                                     ModelState<TH, XSIZE, USIZE, YSIZE> & mstate_ref,
+                                                     TCostStruct<TH, XSIZE> & tcost, int  mode)
 {
     assert(("Actual state size and reference state size not equal", mstate.x.size() == mstate_ref.x.size()));
     assert(("Actual control size and reference control size not equal", mstate.u.size() == mstate_ref.u.size()));
@@ -59,6 +59,6 @@ void Cost<T, XSIZE, USIZE, YSIZE>::terminal_cost_par(ModelState<T, XSIZE, USIZE,
     tcost.Phixx = this->_Qf[mode - 1];
 }
 
-template class CostAbstract<casadi_real>;
-template class Cost<casadi_real, xsize_WB, usize_WB, ysize_WB>;
-template class Cost<casadi_real, xsize_FB, usize_FB, ysize_FB>;
+template class CostAbstract<double>;
+template class Cost<double, xsize_WB, usize_WB, ysize_WB>;
+template class Cost<double, xsize_FB, usize_FB, ysize_FB>;

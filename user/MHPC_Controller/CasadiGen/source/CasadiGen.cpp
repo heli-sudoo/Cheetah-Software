@@ -1,18 +1,17 @@
-#include "MHPC_CPPTypes.h" // overwrite casadi_real in casadi generated functions
 #include "CasadiGen.h"
+#include <assert.h>
 template<typename T>
-void casadi_interface(vector<T *> ARG, vector<T *> RES, int max_sz_res,
+void casadi_interface(std::vector<T *> ARG, std::vector<T *> RES, int max_sz_res,
                       int f(const T **, T **, int_T *, T *, int),
                       const int_T *f_sparse_out(int_T),
                       int f_work(int_T *, int_T *, int_T *, int_T *))
 {
-    // function evaluation
-    // T **arg = nullptr;
-    // T **res = nullptr;
-    // arg = new T* [ARG.size()];
-    // res = new T* [RES.size()]; 
-    T *arg[ARG.size()];
-    T *res[RES.size()];       
+    T **arg = nullptr;
+    T **res = nullptr;
+    arg = new T* [ARG.size()];
+    res = new T* [RES.size()]; 
+    // T *arg[ARG.size()];
+    // T *res[RES.size()];       
     int_T sz_arg, sz_res, n_arg, n_res, sz_iw, sz_w, *iw = nullptr;
     T *w = nullptr;
 
@@ -75,9 +74,11 @@ void casadi_interface(vector<T *> ARG, vector<T *> RES, int max_sz_res,
     {
         if(nullptr != res[idx_res]) delete [] res[idx_res];
     }
+    delete [] arg;
+    delete [] res;
 }
 
-template void casadi_interface<casadi_real> (vector<casadi_real *> ARG, vector<casadi_real *> RES, int max_sz_res,
-                                             int f(const casadi_real **, casadi_real **, int_T *, casadi_real *, int),
-                                             const int_T *f_sparse_out(int_T),
-                                             int f_work(int_T *, int_T *, int_T *, int_T *));
+template void casadi_interface<double>(std::vector<double *> ARG, std::vector<double *> RES, int max_sz_res,
+                                       int f(const double **, double **, int_T *, double *, int),
+                                       const int_T *f_sparse_out(int_T),
+                                       int f_work(int_T *, int_T *, int_T *, int_T *));

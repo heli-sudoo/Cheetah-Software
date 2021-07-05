@@ -1,32 +1,32 @@
 #include "MHPCCost.h"
 
-template <typename T>
-WBCost<T>::WBCost(T dt) : Cost<T, xsize_WB, usize_WB, ysize_WB>(dt, 4)
+template <typename TH>
+WBCost<TH>::WBCost(TH dt) : Cost<TH, xsize_WB, usize_WB, ysize_WB>(dt, 4)
 {
-    this->_Q = new MatMN<T, xsize_WB, xsize_WB>[4];
-    this->_R = new MatMN<T, usize_WB, usize_WB>[4];
-    this->_S = new MatMN<T, ysize_WB, ysize_WB>[4];
-    this->_Qf = new MatMN<T, xsize_WB, xsize_WB>[4];
+    this->_Q = new MatMN<TH, xsize_WB, xsize_WB>[4];
+    this->_R = new MatMN<TH, usize_WB, usize_WB>[4];
+    this->_S = new MatMN<TH, ysize_WB, ysize_WB>[4];
+    this->_Qf = new MatMN<TH, xsize_WB, xsize_WB>[4];
     set_weighting_matrices();
 }
 
-template <typename T>
-FBCost<T>::FBCost(T dt) : Cost<T, xsize_FB, usize_FB, ysize_FB>(dt, 4)
+template <typename TH>
+FBCost<TH>::FBCost(TH dt) : Cost<TH, xsize_FB, usize_FB, ysize_FB>(dt, 4)
 {
-    this->_Q = new MatMN<T, xsize_FB, xsize_FB>[4];
-    this->_R = new MatMN<T, usize_FB, usize_FB>[4];
-    this->_S = new MatMN<T, ysize_FB, ysize_FB>[4];
-    this->_Qf = new MatMN<T, xsize_FB, xsize_FB>[4];
+    this->_Q = new MatMN<TH, xsize_FB, xsize_FB>[4];
+    this->_R = new MatMN<TH, usize_FB, usize_FB>[4];
+    this->_S = new MatMN<TH, ysize_FB, ysize_FB>[4];
+    this->_Qf = new MatMN<TH, xsize_FB, xsize_FB>[4];
     set_weighting_matrices();
 }
 
-template <typename T>
-void WBCost<T>::set_weighting_matrices()
+template <typename TH>
+void WBCost<TH>::set_weighting_matrices()
 {
     // Set weighting matrices for WB running and terminal cost
-    VecM<T, xsize_WB> q, qf[4];
-    VecM<T, usize_WB> r[4];
-    VecM<T, ysize_WB> s[4];
+    VecM<TH, xsize_WB> q, qf[4];
+    VecM<TH, usize_WB> r[4];
+    VecM<TH, ysize_WB> s[4];
     q << 10, 10, 5, 4, 4, 4, 4, 2, 1, .01, 6, 6, 6, 6;
 
     qf[0] << 15, 20, 8, 3, 3, 3, 3, 3, 2, 0.01, 5, 5, 0.01, 0.01;
@@ -39,7 +39,7 @@ void WBCost<T>::set_weighting_matrices()
     r[2] << 1, 1, 5, 5;
     r[3].setOnes();
 
-    std::fill(&s[0], &s[3], VecM<T, ysize_WB>(0, 0, 0, 0));
+    std::fill(&s[0], &s[3], VecM<TH, ysize_WB>(0, 0, 0, 0));
     s[0].tail(2) << 0.3, 0.3;
     s[2].head(2) << 0.15, 0.15;
 
@@ -52,14 +52,14 @@ void WBCost<T>::set_weighting_matrices()
     }
 }
 
-template <typename T>
-void FBCost<T>::set_weighting_matrices()
+template <typename TH>
+void FBCost<TH>::set_weighting_matrices()
 {
-    VecM<T, xsize_FB> q, qf;
-    VecM<T, usize_FB> r[4];
+    VecM<TH, xsize_FB> q, qf;
+    VecM<TH, usize_FB> r[4];
     q.setZero();
     qf.setZero();
-    std::memset(&r[0], 0, 4 * sizeof(VecM<T, usize_FB>));
+    std::memset(&r[0], 0, 4 * sizeof(VecM<TH, usize_FB>));
     q << 5, 10, 5, 2, 1, 0.01;
     qf << 15, 20, 8, 3, 1, 0.01;
     r[0].tail(2) << 0.01, 0.01;
@@ -74,5 +74,5 @@ void FBCost<T>::set_weighting_matrices()
     }
 }
 
-template class WBCost<casadi_real>;
-template class FBCost<casadi_real>;
+template class WBCost<double>;
+template class FBCost<double>;

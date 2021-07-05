@@ -19,16 +19,15 @@ struct ControlFSMData {
   Quadruped<T>* _quadruped;
   StateEstimatorContainer<T>* _stateEstimator;
   LegController<T>* _legController;
-  Gait<T> *_gait;
   DesiredStateCommand<T>* _desiredStateCommand;
-  USRCMD<T> *_usrcmd;
+  USRCMD<double> *_usrcmd;
   ContactEstimator<T> *_contactEstimator;
+  Gait *_gait;
   RobotControlParameters* controlParameters;
   MHPCUserParameters* userParameters;
   VisualizationData* visualizationData;
 };
 
-template struct ControlFSMData<double>;
 template struct ControlFSMData<float>;
 
 #endif  // CONTROLFSM_H

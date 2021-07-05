@@ -3,7 +3,6 @@
 
 #define int_T long long int
 
-#include "MHPC_CPPTypes.h" // overwrite casadi_real in casadi generated functions
 #include "Dyn_FL.h"
 #include "Dyn_FL_par.h"
 #include "Dyn_FS.h"
@@ -25,7 +24,7 @@
 #include "Link2Jacobian.h"
 #include "Link3Jacobian.h"
 #include "Link4Jacobian.h"
-
+#include <vector>
 
 /*
   @brief: Get the numerical evaluation of a CasadiGen function and the output sparsity pattern
@@ -35,7 +34,7 @@
           max_sz_res: maximum size of output variables
 */
 template<typename T>
-void casadi_interface(vector<T *> ARG, vector<T *> RES, int max_sz_res,
+void casadi_interface(std::vector<T *> ARG, std::vector<T *> RES, int max_sz_res,
                       int f(const T **, T **, int_T *, T *, int),
                       const int_T *f_sparse_out(int_T),
                       int f_work(int_T *, int_T *, int_T *, int_T *));

@@ -21,6 +21,7 @@ void PlanarFloatingBase<T>::dynamics(VecM<T,xsize_FB> &x, VecM<T,usize_FB> &u, V
         _contact_state << 0, 0;
         break;                
     }
+    _xdot.setZero();
     vector<T *> arg = {x.data(), u.data(), _foothold.data(), (T *)_contact_state.data()};
     vector<T *> res = {_xdot.data()};
 
@@ -58,6 +59,8 @@ void PlanarFloatingBase<T>::dynamics_par(VecM<T,xsize_FB>& x, VecM<T,usize_FB> &
         _contact_state << 0, 0;
         break;                
     }
+    _Ac.setZero();
+    _Bc.setZero();
     vector<T *> arg = {x.data(), u.data(), _foothold.data(), (T *)_contact_state.data()};
     vector<T *> res = {_Ac.data(), _Bc.data()};
 
@@ -69,11 +72,15 @@ void PlanarFloatingBase<T>::dynamics_par(VecM<T,xsize_FB>& x, VecM<T,usize_FB> &
 }
 
 template<typename T>
-// void PlanarFloatingBase<T>::resetmap_par(DVec<T> &x, DMat<T> &Px, int mode = 1)
 void PlanarFloatingBase<T>::resetmap_par(VecM<T, xsize_FB> &x, MatMN<T,xsize_FB, xsize_FB> &Px, int mode)
 {
     Px.setIdentity();
 }
 
-// template class PlanarFloatingBase<float>;
-template class PlanarFloatingBase<casadi_real>;
+template<typename T>
+void PlanarFloatingBase<T>::plan_foothold(DVec<T> &x,T stance_time, int mode) 
+{
+    _foothold= _foothold_planner->get_foothold_location(x.head(3), stance_time, mode);
+}
+
+template class PlanarFloatingBase<double>;

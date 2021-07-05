@@ -97,4 +97,4 @@ void FSM_State_StandUp<T>::onExit() {
 }
 
 // template class FSM_State_StandUp<double>;
-template class FSM_State_StandUp<casadi_real>;
+template class FSM_State_StandUp<float>;

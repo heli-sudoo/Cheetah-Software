@@ -6,48 +6,48 @@
 #include "ConstraintsBase.h"
 #include "PlanarRobot.h"
 
-template <typename T>
-class FBConstraint : public Constraint<T>
+template <typename TH>
+class FBConstraint : public Constraint<TH>
 {
 protected:// resolve problem of hidden overloaded functions
-    using Constraint<T>::terminal_constraint;
-    using Constraint<T>::path_constraint;
+    using Constraint<TH>::terminal_constraint;
+    using Constraint<TH>::path_constraint;
 
 public:
-    FBConstraint(RobotBase<T> *model);
+    FBConstraint(RobotBase<TH> *model);
 
-    void terminal_constraint(ModelState<T, xsize_FB, usize_FB, ysize_FB> &, vector<TConstrStruct<T, xsize_FB>> &, int) override {}
+    void terminal_constraint(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &, TConstrStruct<TH, xsize_FB>*, int) override {}
 
-    void path_constraint(ModelState<T, xsize_FB, usize_FB, ysize_FB> &, vector<IneqConstrStruct<T, xsize_FB, usize_FB, ysize_FB>> &, int) override {}
+    void path_constraint(ModelState<TH, xsize_FB, usize_FB, ysize_FB> &, IneqConstrStruct<TH, xsize_FB, usize_FB, ysize_FB>*, int) override {}
 };
 
-template <typename T>
-class WBConstraint : public Constraint<T>
+template <typename TH>
+class WBConstraint : public Constraint<TH>
 {
 public:
     size_t _num_torque_limit;
     size_t _num_joint_limit;
     size_t _num_GRF_constraint;
-    DMat<T> C_torque, C_joint, C_grf;
-    DVec<T> b_torque, b_joint, b_grf;
-    T  _friccoeff = 0.6; // static friction coefficient
+    DMat<TH> C_torque, C_joint, C_grf;
+    DVec<TH> b_torque, b_joint, b_grf;
+    float  _friccoeff = 0.6; // static friction coefficient
 
 protected: // resolve problem of hidden overloaded functions
-    using Constraint<T>::terminal_constraint;
-    using Constraint<T>::path_constraint;
+    using Constraint<TH>::terminal_constraint;
+    using Constraint<TH>::path_constraint;
 
 public:
-    WBConstraint(RobotBase<T> *model);
+    WBConstraint(RobotBase<TH> *model);
 
-    void terminal_constraint(ModelState<T, xsize_WB, usize_WB, ysize_WB> &, vector<TConstrStruct<T, xsize_WB>> &, int) override;
+    void terminal_constraint(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &, TConstrStruct<TH, xsize_WB>*, int) override;
 
-    void path_constraint(ModelState<T, xsize_WB, usize_WB, ysize_WB> &, vector<IneqConstrStruct<T, xsize_WB, usize_WB, ysize_WB>> &, int) override;
+    void path_constraint(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<TH, xsize_WB, usize_WB, ysize_WB>*, int) override;
 
-    void torque_limit(ModelState<T, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<T, xsize_WB, usize_WB, ysize_WB>*, int); // torque limit constraint
+    void torque_limit(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<TH, xsize_WB, usize_WB, ysize_WB>*, int); // torque limit constraint
 
-    void GRF_constraint(ModelState<T, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<T, xsize_WB, usize_WB, ysize_WB>*, int); // non-negative normal GRF and friction constraint
+    void GRF_constraint(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<TH, xsize_WB, usize_WB, ysize_WB>*, int); // non-negative normal GRF and friction constraint
 
-    void joint_limit(ModelState<T, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<T, xsize_WB, usize_WB, ysize_WB>*, int); // joint limit constraint
+    void joint_limit(ModelState<TH, xsize_WB, usize_WB, ysize_WB> &, IneqConstrStruct<TH, xsize_WB, usize_WB, ysize_WB>*, int); // joint limit constraint
 
     void initialize_AL_REB_PARAMS();
 };

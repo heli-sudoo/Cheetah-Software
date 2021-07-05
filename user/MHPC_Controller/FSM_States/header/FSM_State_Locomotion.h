@@ -10,7 +10,7 @@
 #include "ControlFSMData.h"
 #include <string>
 
-template<typename T>
+template<typename T, typename T2>
 class FSM_State_Locomotion:public FSM_State<T>
 {
 public:
@@ -53,7 +53,7 @@ public:
  private:
   int iter = 0;   // track execution progress
   int offline_steps;   // length of offline command execution
-  std::vector<Vec4<T>> tau_ff_buf;
+  std::vector<Vec4<T>> tau_des_buf;
   std::vector<Vec4<T>> qdes_buf;
   std::vector<Vec4<T>> qddes_buf;
   std::vector<Vec3<T>> pos_des_buf;
@@ -64,11 +64,11 @@ public:
   VecM<T, 3> pos_des;
   VecM<T, 3> vel_des;
   VecM<T, 4> udes;    // mhpc solution of control for one step
-  MatMN<T, 4, 14> Kddp; // mppc solition of feedback gain
+  MatMN<T, 4, 14> Kddp; // mhpc solition of feedback gain
   VecM<T, 14> state2D; // temporaly holds 2D state
 
   MatMN<T,4,14>* K_DDP_buf = nullptr;
-  MHPCLocomotion<T> *mhpc = nullptr;
+  MHPCLocomotion<T, T2> *mhpc = nullptr;
   MHPCUserParameters * userParams = nullptr;
   std::string OFFLINE_DATA_DIR;
 
